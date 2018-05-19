@@ -24,7 +24,7 @@
             <thead>
             <tr>
                 <th width="2%"><span class="sr-only">Status</span></th>
-                <th width="8%">Id</th>
+                <th width="8%">Invoice Id</th>
                 <th width="30%">Customer's name</th>
                 <th width="30%">Customer's email</th>
                 <th width="10%">Payment</th>
@@ -34,7 +34,7 @@
             <tbody>
             <tr ng-repeat="r in $ctrl.pendingReservations">
                 <td><i class="fa fa-shopping-cart"></i><span class="sr-only">PENDING</span></td>
-                <td><a ui-sref="events.single.view-reservation({eventName : $ctrl.event.shortName,reservationId: r.id})" ng-bind="$ctrl.truncateReservationId(r.id)"></a></td>
+                <td><a ui-sref="events.single.view-reservation({eventName : $ctrl.event.shortName,reservationId: r.id})" ng-bind="r.invoiceNumber"></a></td>
                 <td ng-bind="$ctrl.formatFullName(r)"></td>
                 <td ng-bind="r.email"></td>
                 <td ng-bind="r.paymentMethod"></td>
@@ -58,7 +58,7 @@
             <thead>
                 <tr>
                     <th width="2%"><span class="sr-only">Status</span></th>
-                    <th width="8%">Id</th>
+                    <th width="8%">Invoice Id</th>
                     <th width="30%">Customer's name</th>
                     <th width="30%">Customer's email</th>
                     <th width="10%">Payment</th>
@@ -67,8 +67,10 @@
             </thead>
             <tbody>
                 <tr ng-repeat="r in $ctrl.reservations">
-                    <td ng-class="{'text-danger': r.status != 'COMPLETE', 'text-success': r.status == 'COMPLETE'}"><i uib-tooltip="{{r.status}}" ng-class="{'fa fa-check-circle': r.status == 'COMPLETE', 'fa fa-exclamation': r.status != 'COMPLETE'}"></i></td>
-                    <td><a ui-sref="events.single.view-reservation({eventName : $ctrl.event.shortName,reservationId: r.id})" ng-bind="$ctrl.truncateReservationId(r.id)"></a></td>
+                    <td ng-class="{'text-danger': r.status != 'COMPLETE', 'text-success': r.status == 'COMPLETE'}">
+                        <i uib-tooltip="{{r.status}}" ng-class="{'fa fa-check-circle': r.status == 'COMPLETE', 'fa fa-exclamation': r.status != 'COMPLETE'}"></i>
+                    </td>
+                    <td><a ui-sref="events.single.view-reservation({eventName : $ctrl.event.shortName,reservationId: r.id})" ng-bind="r.invoiceNumber"></a></td>
                     <td ng-bind="$ctrl.formatFullName(r)"></td>
                     <td ng-bind="r.email"></td>
                     <td ng-bind="r.paymentMethod"></td>

@@ -2,8 +2,7 @@
     <form role="form" name="viewReservation" ng-submit="$ctrl.update(viewReservation)" error-sensitive="viewReservation" novalidate>
         <div class="page-header">
             <h1>View reservation for {{$ctrl.event.displayName}}</h1>
-            <small>Reservation ID: {{$ctrl.reservation.id}}</small>
-            <small ng-if="$ctrl.reservationDescriptor.reservation.hasInvoiceNumber">Invoice number: {{$ctrl.reservationDescriptor.reservation.invoiceNumber}}</small>
+            <label ng-if="$ctrl.reservationDescriptor.reservation.hasInvoiceNumber">Invoice number: {{$ctrl.reservationDescriptor.reservation.invoiceNumber}}</label>
         </div>
 
         <div uib-alert type="success" close="$ctrl.hideCreationWarning()" data-ng-if="$ctrl.displayCreationWarning">
@@ -23,8 +22,6 @@
                 <uib-tab-heading>
                     Info
                 </uib-tab-heading>
-
-
 
                 <div class="page-header">
                     <h3>Reservation details

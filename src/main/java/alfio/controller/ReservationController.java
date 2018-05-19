@@ -339,7 +339,7 @@ public class ReservationController {
             model.addAttribute("totalPrice", orderSummary.getTotalPrice());
             model.addAttribute("emailAddress", organizationRepository.getById(ev.getOrganizationId()).getEmail());
             model.addAttribute("reservation", ticketReservation);
-            model.addAttribute("paymentReason", ev.getShortName() + " " + ticketReservationManager.getShortReservationID(ev, reservationId));
+            model.addAttribute("paymentReason", ticketReservation.getInvoiceNumber());
             model.addAttribute("pageTitle", "reservation-page-waiting.header.title");
             model.addAttribute("bankAccount", configurationManager.getStringConfigValue(Configuration.from(ev.getOrganizationId(), ev.getId(), BANK_ACCOUNT_NR)).orElse(""));
 

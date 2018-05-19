@@ -9,8 +9,6 @@
         templateUrl: '../resources/js/admin/feature/reservations-list/reservations-list.html'
     });
     
-    
-    
     function ReservationsListCtrl(EventService, $filter, $location) {
         var ctrl = this;
 

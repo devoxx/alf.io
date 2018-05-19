@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html>
+	<head>
+		<style>
+			body {
+				font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;
+				font-size:11pt;
+			}
+
+            h1,h2,p {margin:0;}
+
+			h2 {
+				font-size:120%;
+				font-weight:normal;
+				margin-bottom:10px;
+			}
+
+			h3 {
+			    font-weight:normal;
+			}
+
+			table {
+				margin-bottom:30px;
+			}
+
+			.text-center {
+			    text-align:center;
+			}
+
+			.text-right {
+                text-align:right;
+            }
+
+            .margin-bottom-line {
+                margin-bottom:1em;
+            }
+
+            table.summary {
+                border-collapse:collapse;
+                margin-bottom: 20px;
+                border-spacing: 0;
+            }
+
+            table.summary > tbody > tr:nth-child(even) > td,
+            table.summary > tbody > tr:nth-child(even) > th {
+                background-color: #f9f9f9;
+            }
+
+            table.summary > tbody > tr:last-child > td {
+                border-bottom: 1px solid #aaa;
+            }
+
+            table.summary, table.summary th, table.summary td {
+                border: 1px solid #aaa;
+                padding:5px;
+                margin:0;
+            }
+
+            table.summary > tfoot,
+            table.summary > tfoot > tr > th {
+                border-color: #ffffff;
+            }
+
+            table.summary > tfoot > tr:first-child > th {
+                border-top: 1px solid #aaa;
+            }
+
+            table.summary > thead > tr > th {
+                background-color: #f9f9f9;
+            }
+
+            table.summary td, table.summary th {
+                min-height: 25px;
+            }
+
+            .strong {
+                font-weight: bold;
+            }
+
+            .mb {
+                margin-bottom: 3em;
+            }
+
+            .mt {
+                margin-top: 3em;
+            }
+
+            .mb2 {
+                margin-bottom: 6em;
+            }
+
+            .no-padding {
+                padding: 0 !important;
+            }
+            .small {
+                font-size:80%;
+            }
+
+		</style>
+	</head>
+	<body>
+        <table style="width:100%">
+            <tr>
+                {{#eventImage}}<td style="width:{{imageWidth}}px; height:{{imageHeight}}px"><img style="margin:auto; width:{{imageWidth}}px; height:{{imageHeight}}px" src="{{eventImage}}"/></td>{{/eventImage}}
+                {{^eventImage}}<td style="text-align: center; vertical-align: middle;"><h1>{{event.displayName}}</h1></td>{{/eventImage}}
+                <td style="text-align: center; vertical-align: middle;">
+                    <h1>Factuur - Invoice</h1>
+                    <h3>Devoxx Belgium 2018</h3>
+                    <p>The Developers Community Conference</p>
+                </td>
+            </tr>
+        </table>
+
+        <hr>
+        <p>The Java Community EBVBA</p>
+
+        <table style="width:100%;" class="mb">
+            <tr>
+                <td style="width:50%" class="small">
+                    <table>
+                        <tr>
+                            <td class="text-right">Referentie :</td>
+                            <td>{{ticketReservation.invoiceNumber}}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-right">Rek. nr :</td>
+                            <td>475-7036601-43 EUR</td>
+                        </tr>
+                        <tr>
+                            <td class="text-right">IBAN nr :</td>
+                            <td>BE66475703660143</td>
+                        </tr>
+                        <tr>
+                            <td class="text-right">SWIFT nr :</td>
+                            <td>KREDBEBB</td>
+                        </tr>
+                        <tr>
+                            <td class="text-right" style="vertical-align: baseline;">Bank :</td>
+                            <td>KBC bank Loppem<br>Kortrijksestraat 27<br>8020 Oostkamp<br>Belgium<br></td>
+                        </tr>
+                    </table>
+                </td>
+                <td style="width:50%; vertical-align: middle;">
+                    {{#ticketReservation.hasBillingAddress}}
+                    {{#ticketReservation.lineSplittedBillingAddress}}
+                    <p>{{.}}</p>
+                    {{/ticketReservation.lineSplittedBillingAddress}}
+                    {{/ticketReservation.hasBillingAddress}}
+                    {{#ticketReservation.hasVatNumber}}BTW/VAT nr : {{ticketReservation.vatNr}}{{/ticketReservation.hasVatNumber}}
+                </td>
+            </tr>
+        </table>
+
+        <table style="width:100%;" class="summary">
+            <thead>
+                <tr>
+                    <th class="text-center" style="width:10%">Qty</th>
+                    <th class="text-center" style="width:60%">Category</th>
+                    <th class="text-center" style="width:15%">Price ({{event.currency}})</th>
+                    <th class="text-center" style="width:15%">Subtotal ({{event.currency}})</th>
+                </tr>
+            </thead>
+            <tbody>
+        {{#orderSummary.summary}}
+                <tr>
+                    <td class="text-center">{{amount}}</td>
+                    <td>{{name}}</td>
+                    <td class="text-right">{{priceBeforeVat}}</td>
+                    <td class="text-right">{{subTotalBeforeVat}}</td>
+                </tr>
+        {{/orderSummary.summary}}
+            </tbody>
+            <tfoot>
+                {{^orderSummary.free}}
+                    {{#orderSummary.displayVat}}
+                        <tr><th colspan="3" class="no-padding">VAT at {{ticketReservation.usedVatPercent}}%</th><th class="text-right">{{orderSummary.totalVAT}}</th></tr>
+                    {{/orderSummary.displayVat}}
+                    {{^orderSummary.displayVat}}
+                        <tr><th colspan="4" class="no-padding">VAT not added as per EU Directives</th></tr>
+                    {{/orderSummary.displayVat}}
+                {{/orderSummary.free}}
+                <tr><th colspan="3" class="strong" class="no-padding">Total</th><th class="text-right strong">{{event.currency}} {{orderSummary.totalPrice}}</th></tr>
+            </tfoot>
+        </table>
+
+        <div style="margin-top:1em; text-align: center;">
+            <p><strong>Please add the invoice reference '{{ticketReservation.invoiceNumber}}' to your payment.</strong></p>
+            <br><br>
+            <p>De factuur is wettelijk bindend. Voor meer informatie, contacteer ons via payment@devoxx.com</p>
+            <p>This invoice is legally binding. For more information, please contact us via payment@devoxx.com</p>
+            <br>
+            <hr/>
+             <p>The Java Community EBVBA</p>
+             <p>Lijsterbessendreef 1</p>
+             <p>8020 Oostkamp</p>
+             <p>Belgie</p>
+             <br>
+             <p>BTW BE 0477.182.887 - RPR Brugge</p>
+            <hr/>
+            <br>
+            <br>
+            <br>
+        </div>
+        <div>
+            <H2>Payment Terms and Conditions:</H2>
+            <p>Payment on receipt of invoice / Contant te betalen na ontvangst van invoice</p>
+            <br>
+            <h2>Cancellations, substitutions, and refunds only policy</h2>
+            <p>Cancellation of your Devoxx 2017 conference registration for any reason, must be received in writing and sent to our registration department via Fax +32 50 67 57 92 or email payment@devoxx.com.</p>
+            <p>For a full refund (minus 25 Euro admin costs), notification must be received by August 31st 2018. After September 2018, a 50% refund will be given. No refunds will be made after October 1st 2017. No credits are given for late notices or no
+               shows. Registrants may send a substitute attendee if written notice is received prior to the conference. Conference planners reserves the right to rescind any registration and in that event will return 100% of the registration fee. All dates
+               and times of the 2018 Devoxx conference program are subject to change.</p>
+            <br>
+            <p>Be sure to check the Devoxx 2018 conference website at https://devoxx.be regularly to ensure you have the latest updates on the conference and program schedule.</p>
+            <p></p>You can also subscribe to the Devoxx newsletter @ https://devoxx.be/newsletter/ to receive conference updates.</p>
+            <UL>
+                <LI>Deep Dive days are from Monday November 12th til Tuesday November 13th.</LI>
+                <LI>Conference days are from Wednesday November 14th til Friday November 16th.</LI>
+                <LI>Combi days are from Monday November 12th til Friday November 16th.</LI>
+            </UL>
+
+            <p>If you have any questions or concerns regarding your registration, please contact us via payment@devoxx.com</p>
+            <br>
+            <h2>Force Majeure</h2>
+            <p>‘Force Majeure Event’ means the occurrence of:<br>
+            an act of war, terrorism, civil disorder, strike, blockade or embargo; or any significant threat thereof, which leads to
+            government measures or a ‘fait du prince’ preventing or prohibiting Devoxx from taking place;
+            tempest, earthquake, adverse weather conditions or any other ‘Act of God’ or natural disaster; or pollution of water
+            sources important to the place where Devoxx takes place;
+            other unforeseeable unavoidable circumstances beyond the control of the Parties against which it would have been
+            unreasonable for the affected party to take precautions;
+            which in each case directly causes The Java Community BVBA to be unable to comply with all or a material part of its
+            obligations under this agreement; Neither party shall be in breach of its obligations under this agreement or incur any
+            liability to the other party for any losses or damages of any nature whatsoever incurred or suffered by that other and
+            caused by a Force Majeure Event. The Java Community BVBA shall not be required to refund any (down) payments
+            made by any sponsoring company in relation to the conference that is affected by the Force Majeure Event.
+            </p>
+        </div>
+
+
+    </body>
+</html>
