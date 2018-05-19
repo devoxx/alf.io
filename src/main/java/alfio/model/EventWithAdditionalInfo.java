@@ -45,6 +45,8 @@ public class EventWithAdditionalInfo implements StatisticsContainer, PriceContai
 
     private final BigDecimal grossIncome;
 
+    private final BigDecimal netIncome;
+
     @JsonIgnore
     public Event getEvent() {
         return event;
