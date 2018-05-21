@@ -64,7 +64,7 @@
         {{^orderSummary.free}}
             {{#orderSummary.displayVat}}
                 {{^event.vatIncluded}}
-                    <tr><td colspan="3">{{#i18n}}reservation-page.vat [{{event.vat}}]{{/i18n}}</td><td class="text-right">{{orderSummary.totalVAT}} {{event.currency}}</td></tr>
+                    <tr><td colspan="3">{{#i18n}}reservation-page.vat [{{event.vat}}] [{{vatTranslation}}]{{/i18n}}</td><td class="text-right">{{orderSummary.totalVAT}} {{event.currency}}</td></tr>
                 {{/event.vatIncluded}}
             {{/orderSummary.displayVat}}
         {{/orderSummary.free}}
@@ -73,11 +73,11 @@
         {{^orderSummary.free}}
             {{#orderSummary.displayVat}}
                 {{#event.vatIncluded}}
-                    <tr><td colspan="3">{{#i18n}}reservation-page.vat-included [{{event.vat}}]{{/i18n}}</td><td class="text-right">{{orderSummary.totalVAT}} {{event.currency}}</td></tr>
+                    <tr><td colspan="3">{{#i18n}}reservation-page.vat-included [{{event.vat}}] [{{vatTranslation}}]{{/i18n}}</td><td class="text-right">{{orderSummary.totalVAT}} {{event.currency}}</td></tr>
                 {{/event.vatIncluded}}
             {{/orderSummary.displayVat}}
             {{^orderSummary.displayVat}}
-                <tr><td colspan="4">{{#i18n}}invoice.vat-voided{{/i18n}}</td></tr>
+                <tr><td colspan="4">{{#i18n}}invoice.vat-voided [{{vatTranslation}}]{{/i18n}}</td></tr>
             {{/orderSummary.displayVat}}
         {{/orderSummary.free}}
     </tfoot>
@@ -270,11 +270,18 @@
                     <div class="col-xs-12 col-sm-4">
                         <div class="form-group">
                             <label for="vatCountry">{{#i18n}}reservation-page-complete.country{{/i18n}}</label>
-                            <select name="vatCountryCode" id="vatCountry" value="{{paymentForm.vatCountryCode}}" class="form-control">
-                                <option value="">{{#i18n}}reservation-page.country.outside-eu{{/i18n}}</option>
-                                {{#euCountries}}
-                                    <option value="{{left}}">{{right}}</option>
-                                {{/euCountries}}
+                            <select name="vatCountryCode" id="vatCountry" value="{{paymentForm.vatCountryCode}}" class="form-control field-required">
+                                <option value="">{{#i18n}}reservation-page.country.select{{/i18n}}</option>
+                                <optgroup label="{{#i18n}}reservation-page.eu-countries{{/i18n}}">
+                                {{#euCountriesForVat}}
+                                    <option value="{{left}}">{{left}} - {{right}}</option>
+                                {{/euCountriesForVat}}
+                                </optgroup>
+                                <optgroup label="{{#i18n}}reservation-page.all-countries{{/i18n}}">
+                                {{#countriesForVat}}
+                                    <option value="{{left}}">{{left}} - {{right}}</option>
+                                {{/countriesForVat}}
+                                </optgroup>
                             </select>
                         </div>
                     </div>
@@ -282,11 +289,11 @@
                     <div id="vat-number-container" class="{{^paymentForm.hasVatCountryCode}}hidden-xs hidden-sm hidden-md hidden-lg{{/paymentForm.hasVatCountryCode}}">
                             <div class="col-xs-6 col-sm-8">
                                 <div class="form-group">
-                                    <label for="vatNr">{{#i18n}}invoice.vat{{/i18n}}</label>
+                                    <label for="vatNr">{{#i18n}}invoice.vat [{{vatTranslation}}]{{/i18n}}</label>
                                     <div class="input-group">
                                         <input id="vatNr" type="text" required name="vatNr" class="form-control" value="{{paymentForm.vatNr}}"/>
                                         <div class="input-group-btn">
-                                            <button type="button" class="btn btn-warning btn-block" data-validation-url="{{request.contextPath}}/event/{{event.shortName}}/reservation/{{reservation.id}}/vat-validation" id="validateVAT" data-text="{{#i18n}}invoice.validate.vat{{/i18n}}">{{#i18n}}invoice.validate.vat{{/i18n}}</button>
+                                            <button type="button" class="btn btn-warning btn-block" data-validation-url="{{request.contextPath}}/event/{{event.shortName}}/reservation/{{reservation.id}}/vat-validation" id="validateVAT" data-text="{{#i18n}}invoice.validate.vat [{{vatTranslation}}]{{/i18n}}">{{#i18n}}invoice.validate.vat [{{vatTranslation}}]{{/i18n}}</button>
                                         </div>
                                     </div>
                                 </div>
@@ -295,9 +302,9 @@
                 </div>
                 <div id="validation-result-container" class="row {{^paymentForm.hasVatCountryCode}}hidden-xs hidden-sm hidden-md hidden-lg{{/paymentForm.hasVatCountryCode}}">
                     <div class="col-xs-10 text-right">
-                        <span id="validation-result" class="text-danger" data-validation-error-msg="{{#i18n}}reservation-page.vat-validation-error{{/i18n}}"
-                              data-generic-error-msg="{{#i18n}}reservation-page.vat-error{{/i18n}}"
-                              data-validation-required-msg="{{#i18n}}reservation-page.vat-validation-required{{/i18n}}"></span>
+                        <span id="validation-result" class="text-danger" data-validation-error-msg="{{#i18n}}reservation-page.vat-validation-error [{{vatTranslation}}]{{/i18n}}"
+                              data-generic-error-msg="{{#i18n}}reservation-page.vat-error [{{vatTranslation}}]{{/i18n}}"
+                              data-validation-required-msg="{{#i18n}}reservation-page.vat-validation-required [{{vatTranslation}}]{{/i18n}}"></span>
                     </div>
                 </div>
             {{/vatNrIsLinked}}
@@ -317,7 +324,7 @@
                 </div>
                 <div class="col-xs-6 col-md-2">
                     <div class="form-group">
-                        <label class="control-label">{{#i18n}}invoice.vat{{/i18n}}</label>
+                        <label class="control-label">{{#i18n}}invoice.vat [{{vatTranslation}}]{{/i18n}}</label>
                         <p class="form-control-static">{{paymentForm.vatNr}}</p>
                     </div>
                 </div>

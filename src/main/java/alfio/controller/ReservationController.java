@@ -152,7 +152,7 @@ public class ReservationController {
                     if(orderSummary.getFree() || activePaymentMethods.stream().anyMatch(p -> p == PaymentProxy.OFFLINE || p == PaymentProxy.ON_SITE)) {
                         boolean captchaForOfflinePaymentEnabled = configurationManager.isRecaptchaForOfflinePaymentEnabled(event);
                         model.addAttribute("captchaRequestedForOffline", captchaForOfflinePaymentEnabled)
-                            .addAttribute("recaptchaApiKey", configurationManager.getStringConfigValue(Configuration.getSystemConfiguration(RECAPTCHA_API_KEY), null))
+                            .addAttribute("recaptchaApiKey", configurationManager.getStringConfigValue(getSystemConfiguration(RECAPTCHA_API_KEY), null))
                             .addAttribute("captchaRequestedFreeOfCharge", orderSummary.getFree() && captchaForOfflinePaymentEnabled);
                     }
 
@@ -168,7 +168,8 @@ public class ReservationController {
                         .addAttribute("expressCheckoutEnabled", isExpressCheckoutEnabled(event, orderSummary))
                         .addAttribute("useFirstAndLastName", event.mustUseFirstAndLastName())
                         .addAttribute("countries", TicketHelper.getLocalizedCountries(locale))
-                        .addAttribute("euCountries", TicketHelper.getLocalizedEUCountries(locale, configurationManager.getRequiredValue(getSystemConfiguration(ConfigurationKeys.EU_COUNTRIES_LIST))))
+                        .addAttribute("countriesForVat", TicketHelper.getLocalizedCountriesForVat(locale))
+                        .addAttribute("euCountriesForVat", TicketHelper.getLocalizedEUCountriesForVat(locale, configurationManager.getRequiredValue(getSystemConfiguration(ConfigurationKeys.EU_COUNTRIES_LIST))))
                         .addAttribute("euVatCheckingEnabled", vatChecker.isVatCheckingEnabledFor(event.getOrganizationId()))
                         .addAttribute("invoiceIsAllowed", invoiceAllowed)
                         .addAttribute("vatNrIsLinked", orderSummary.isVatExempt() || paymentForm.getHasVatCountryCode())

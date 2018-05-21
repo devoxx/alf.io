@@ -134,6 +134,7 @@ public enum ConfigurationKeys {
     INVOICE_NUMBER_PATTERN("Invoice number pattern, example: INVOICE-%d", false, SettingCategory.INVOICE, ComponentType.TEXT, false, EnumSet.of(SYSTEM, ORGANIZATION, EVENT), true),
     INVOICE_ADDRESS("Invoice address", false, SettingCategory.INVOICE, ComponentType.TEXTAREA, false, EnumSet.of(SYSTEM, ORGANIZATION, EVENT), true),
     ENABLE_EU_VAT_DIRECTIVE("Enable EU VAT handling for EU Companies", false, SettingCategory.INVOICE_EU, ComponentType.BOOLEAN, false, EnumSet.of(SYSTEM, ORGANIZATION), false),
+    APPLY_VAT_FOREIGN_BUSINESS("Apply VAT for non-EU B2B customers (default true)", false, SettingCategory.INVOICE_EU, ComponentType.BOOLEAN, false, EnumSet.of(SYSTEM, ORGANIZATION), true),
     COUNTRY_OF_BUSINESS("The Country where the organizer runs its Business (can differ from event location)", false, SettingCategory.INVOICE_EU, ComponentType.LIST, false, EnumSet.of(SYSTEM, ORGANIZATION), false),
     EU_COUNTRIES_LIST("EU Countries", true, SettingCategory.INVOICE_EU, ComponentType.LIST, false, EnumSet.of(SYSTEM), false),
     EU_VAT_API_ADDRESS("EU VAT API address", false, SettingCategory.INVOICE_EU, ComponentType.TEXT, false, EnumSet.of(SYSTEM), false),
@@ -153,9 +154,14 @@ public enum ConfigurationKeys {
     ALFIO_PI_INTEGRATION_ENABLED("Enable Alf.io-PI integration", false, SettingCategory.ALFIO_PI, ComponentType.BOOLEAN, false, EnumSet.of(SYSTEM), false),
     OFFLINE_CHECKIN_ENABLED("Offline Check-in enabled", false, SettingCategory.ALFIO_PI, ComponentType.BOOLEAN, false, EnumSet.of(EVENT), false),
     LABEL_PRINTING_ENABLED("Label Printing enabled", false, SettingCategory.ALFIO_PI, ComponentType.BOOLEAN, false, EnumSet.of(EVENT), false),
-    LABEL_LAYOUT("Label layout", false, SettingCategory.ALFIO_PI, ComponentType.TEXTAREA, false, EnumSet.of(EVENT), false);
+    LABEL_LAYOUT("Label layout", false, SettingCategory.ALFIO_PI, ComponentType.TEXTAREA, false, EnumSet.of(EVENT), false),
 
-
+    //
+    TRANSLATION_OVERRIDE_VAT_EN("Override the default tax term EN: VAT", false, SettingCategory.TRANSLATIONS, ComponentType.TEXT, false, EnumSet.of(SYSTEM, ORGANIZATION, EVENT), false),
+    TRANSLATION_OVERRIDE_VAT_DE("Override the default tax term DE: Mehrwertsteuer", false, SettingCategory.TRANSLATIONS, ComponentType.TEXT, false, EnumSet.of(SYSTEM, ORGANIZATION, EVENT), false),
+    TRANSLATION_OVERRIDE_VAT_FR("Override the default tax term FR: TVA", false, SettingCategory.TRANSLATIONS, ComponentType.TEXT, false, EnumSet.of(SYSTEM, ORGANIZATION, EVENT), false),
+    TRANSLATION_OVERRIDE_VAT_IT("Override the default tax term IT: IVA", false, SettingCategory.TRANSLATIONS, ComponentType.TEXT, false, EnumSet.of(SYSTEM, ORGANIZATION, EVENT), false),
+    TRANSLATION_OVERRIDE_VAT_NL("Override the default tax term NL: BTW", false, SettingCategory.TRANSLATIONS, ComponentType.TEXT, false, EnumSet.of(SYSTEM, ORGANIZATION, EVENT), false);
 
     @Getter
     public enum SettingCategory {
@@ -169,7 +175,8 @@ public enum ConfigurationKeys {
         INVOICE_EU("Invoice settings for EU"),
         MAIL("E-Mail settings"),
         ALFIO_PI("Offline check-in and badge printing"),
-        MAP("Maps settings");
+        MAP("Maps settings"),
+        TRANSLATIONS("Translations");
 
         private final String description;
         SettingCategory(String description) {
