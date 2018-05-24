@@ -184,7 +184,7 @@
     <div class="panel panel-default">
         <div class="panel-heading" role="tab" id="headingOne">
             <h4 class="panel-title">
-                <i class="fa fa-gift"></i>
+                <i class="fa fa-handshake-o"></i>
                 <a data-toggle="collapse" href="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
                     {{#i18n}}show-event.promo-code{{/i18n}}
                 </a>
