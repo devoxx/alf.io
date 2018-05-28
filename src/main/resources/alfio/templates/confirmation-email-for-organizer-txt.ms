@@ -1,4 +1,4 @@
-{{ticketReservation.fullName}}<{{ticketReservation.email}}> has completed the reservation {{ticketReservation.id}} for event {{event.displayName}}
+{{ticketReservation.fullName}}<{{ticketReservation.email}}> has completed the reservation {{ticketReservation.invoiceNumber}} for {{event.displayName}}
 
 {{#orderSummary.summary}}
 Category: {{name}}, Quantity: {{amount}}, Subtotal: {{subTotal}} {{event.currency}}, Payment Method: {{ticketReservation.paymentMethod}}{{/orderSummary.summary}}

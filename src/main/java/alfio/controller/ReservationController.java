@@ -565,7 +565,7 @@ public class ReservationController {
         Organization organization = organizationRepository.getById(event.getOrganizationId());
         List<String> cc = notificationManager.getCCForEventOrganizer(event);
 
-        notificationManager.sendSimpleEmail(event, organization.getEmail(), cc, "Reservation complete " + reservation.getId(), () ->
+        notificationManager.sendSimpleEmail(event, organization.getEmail(), cc, "Reservation complete " + reservation.getInvoiceNumber(), () ->
             templateManager.renderTemplate(event, TemplateResource.CONFIRMATION_EMAIL_FOR_ORGANIZER, ticketReservationManager.prepareModelForReservationEmail(event, reservation),
                 RequestContextUtils.getLocale(request))
         );
