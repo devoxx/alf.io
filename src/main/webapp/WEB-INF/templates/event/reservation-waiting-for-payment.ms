@@ -21,12 +21,12 @@
         {{^hasBankAccountOwnerSet}}
         <li>{{#i18n}}reservation-page-waiting.required-steps.1 [{{event.currency}} {{totalPrice}}] [{{bankAccount}}] [<mark>{{paymentReason}}</mark>]{{/i18n}}</li>
         {{/hasBankAccountOwnerSet}}
-        <li>{{#i18n}}reservation-page-waiting.required-steps.2 [{{emailAddress}}] [{{reservation.id}}]{{/i18n}}</li>
+        <li>{{#i18n}}reservation-page-waiting.required-steps.2 [{{emailAddress}}] [{{paymentReason}}]{{/i18n}}</li>
         <li>{{#i18n}}reservation-page-waiting.required-steps.3{{/i18n}}</li>
     </ol>
 </div>
 <div class="text-center wMarginTop">
-    <h4>{{#i18n}}reservation-page-waiting.questions [{{emailAddress}}] [{{reservation.id}}]{{/i18n}}</h4>
+    <h4>{{#i18n}}reservation-page-waiting.questions [{{emailAddress}}] [{{paymentReason}}]{{/i18n}}</h4>
 </div>
 <div class="wMarginBottom">&nbsp;</div>
 <div class="container-fluid" id="back-to-event-site">
