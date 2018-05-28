@@ -494,7 +494,7 @@ public class TicketReservationManager {
         }
 
         notificationManager.sendSimpleEmail(event, ticketReservation.getEmail(), messageSource.getMessage("reservation-email-subject",
-                new Object[]{ticketReservation.getInvoiceNumber()}, language),
+                new Object[]{ticketReservation.getInvoiceNumber(), event.getDisplayName()}, language),
             () -> templateManager.renderTemplate(event, TemplateResource.CONFIRMATION_EMAIL, reservationEmailModel, language), attachments);
     }
 
