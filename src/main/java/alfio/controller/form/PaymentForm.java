@@ -165,4 +165,8 @@ public class PaymentForm implements Serializable {
     public boolean getHasVatCountryCode() {
         return !StringUtils.isEmpty(vatCountryCode);
     }
+
+    public boolean getHasVatNr() {
+        return StringUtils.isNotEmpty(vatNr);
+    }
 }

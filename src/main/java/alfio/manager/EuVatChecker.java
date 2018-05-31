@@ -63,13 +63,13 @@ public class EuVatChecker {
             boolean vatNrNotEmpty = StringUtils.isNotEmpty(vatNr);
             boolean validCountryCode = StringUtils.length(StringUtils.trimToNull(countryCode)) == 2;
 
-            if(!vatNrNotEmpty || !validCountryCode) {
+            if(!validCountryCode) {
                 return Optional.empty();
             }
 
             boolean euCountryCode = configurationManager.getRequiredValue(getSystemConfiguration(ConfigurationKeys.EU_COUNTRIES_LIST)).contains(countryCode);
 
-            if(euCountryCode && checkingEnabled(configurationManager, organizationId)) {
+            if(euCountryCode && vatNrNotEmpty && checkingEnabled(configurationManager, organizationId)) {
                 Request request = new Request.Builder()
                     .url(apiAddress(configurationManager) + "?country="+countryCode.toUpperCase()+"&number="+vatNr)
                     .get()
@@ -84,10 +84,12 @@ public class EuVatChecker {
                     log.warn("Error while calling VAT NR check.", e);
                     return Optional.empty();
                 }
-            } else {
+            } else if(!euCountryCode) {
                 String organizerCountry = organizerCountry(configurationManager, organizationId);
                 Supplier<Boolean> applyVatToForeignBusiness = () -> configurationManager.getBooleanConfigValue(Configuration.from(organizationId, APPLY_VAT_FOREIGN_BUSINESS), true);
                 return Optional.of(new VatDetail(vatNr, countryCode, true, "", "", !organizerCountry.equals(countryCode) && !applyVatToForeignBusiness.get()));
+            } else {
+                return Optional.empty();
             }
         };
     }
