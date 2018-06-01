@@ -178,19 +178,19 @@
                 <div class="form-group">
                     <label for="vatCountry">{{#i18n}}reservation-page-complete.country{{/i18n}}</label>
         {{#vatNrIsLinked}}
-                    <div class="form-control-static">{{paymentForm.vatCountryCode}}</div>
+                    <div class="form-control-static">{{#country-name}}{{paymentForm.vatCountryCode}} locale:{{#i18n}}locale{{/i18n}}{{/country-name}}</div>
         {{/vatNrIsLinked}}
         {{^vatNrIsLinked}}
                     <select name="vatCountryCode" id="vatCountry" value="{{paymentForm.vatCountryCode}}" class="form-control field-required" required>
                         <option value="">{{#i18n}}reservation-page.country.select{{/i18n}}</option>
                         <optgroup label="{{#i18n}}reservation-page.eu-countries{{/i18n}}" id="optgroup-eu-countries-list">
                             {{#euCountriesForVat}}
-                                <option value="{{left}}">{{left}} - {{right}}</option>
+                                <option value="{{left}}" data-description="{{right}}">{{left}} - {{right}}</option>
                             {{/euCountriesForVat}}
                         </optgroup>
                         <optgroup label="{{#i18n}}reservation-page.all-countries{{/i18n}}">
                             {{#countriesForVat}}
-                                <option value="{{left}}">{{left}} - {{right}}</option>
+                                <option value="{{left}}" data-description="{{right}}">{{left}} - {{right}}</option>
                             {{/countriesForVat}}
                         </optgroup>
                     </select>
@@ -319,7 +319,7 @@
                     <div class="col-xs-12 col-sm-4">
                         <div class="form-group">
                             <label>{{#i18n}}reservation-page-complete.country{{/i18n}}</label>
-                            <div class="form-control-static" id="selected-country-code"></div>
+                            <div class="form-control-static" id="selected-country"></div>
                         </div>
                     </div>
 
@@ -328,6 +328,9 @@
                                 <div class="form-group">
                                     <label for="vatNr">{{#i18n}}invoice.vat [{{vatTranslation}}]{{/i18n}}</label>
                                     <div class="input-group">
+                                        <div class="input-group-addon" id="selected-country-code">
+
+                                        </div>
                                         <input id="vatNr" type="text" required name="vatNr" class="form-control" value="{{paymentForm.vatNr}}"/>
                                         <div class="input-group-btn">
                                             <button type="button" class="btn btn-warning btn-block" data-validation-url="{{request.contextPath}}/event/{{event.shortName}}/reservation/{{reservation.id}}/vat-validation" id="validateVAT"
@@ -358,7 +361,12 @@
                 <div class="col-xs-6 col-md-2">
                     <div class="form-group">
                         <label class="control-label">{{#i18n}}reservation-page-complete.country{{/i18n}}</label>
+                {{#paymentForm.hasVatNr}}
                         <p class="form-control-static">{{paymentForm.vatCountryCode}}</p>
+                {{/paymentForm.hasVatNr}}
+                {{^paymentForm.hasVatNr}}
+                        <p class="form-control-static">{{#country-name}}{{paymentForm.vatCountryCode}} locale:{{#i18n}}locale{{/i18n}}{{/country-name}}</p>
+                {{/paymentForm.hasVatNr}}
                     </div>
                 </div>
                 {{#paymentForm.hasVatNr}}
