@@ -119,16 +119,16 @@
                 return false;
             }
 
-            var vatCountry = $('#vatCountry');
-            if(vatCountry.length && vatCountry.val() !== '') {
-                var vatNr = $('#vatNr');
-                markFieldAsError(vatNr);
-                $('#validation-result-container').removeClass(hiddenClasses);
-                var validationResult = $('#validation-result');
-                validationResult.html(validationResult.attr('data-validation-required-msg'));
-                vatNr.focus();
-                return false;
-            }
+            //var vatCountry = $('#vatCountry');
+            // if(vatCountry.length && vatCountry.val() !== '') {
+            //     var vatNr = $('#vatNr');
+            //     markFieldAsError(vatNr);
+            //     $('#validation-result-container').removeClass(hiddenClasses);
+            //     var validationResult = $('#validation-result');
+            //     validationResult.html(validationResult.attr('data-validation-required-msg'));
+            //     vatNr.focus();
+            //     return false;
+            // }
              
             // Disable the submit button to prevent repeated clicks
             $form.find('button').prop('disabled', true);
@@ -300,7 +300,7 @@
 
 
         function disableBillingFields() {
-            $('#vatNr,#vatCountryCode').attr('required', false).attr('disabled', '');
+            $('#vatNr').attr('required', false).attr('disabled', '');
         }
 
         disableBillingFields();
@@ -311,10 +311,14 @@
             if($(this).is(':checked')) {
                 element.find('.field-required').attr('required', true);
                 element.removeClass('hidden');
-                euBillingCountry.change();
-                if(euBillingCountry.length === 0) {
-                    //$('#billing-address-container').removeClass(hiddenClasses);
-                    $('#billing-address').attr('required', true).removeAttr('disabled');
+                var country = euBillingCountry.val() || '';
+                var isCountrySelected = country !== '';
+                if(isCountrySelected && $("#optgroup-eu-countries-list option[value="+country+"]").length === 1) {
+                    //EU country selected
+                    euBillingCountry.change();
+                } else if(isCountrySelected) {
+                    //non-EU, we must trigger validation
+                    console.log("TODO: trigger validation for ", country);
                 }
             } else {
                 element.find('.field-required').attr('required', false);
@@ -325,37 +329,32 @@
         });
 
         var euBillingCountry = $('#vatCountry');
-        euBillingCountry.change(function() {
+        euBillingCountry.change(function(event) {
+            if($(this).attr('lastKnown') === $(this).val()) {
+                return;
+            }
             if($(this).val() === '') {
-                //$('#billing-address-container').removeClass(hiddenClasses);
                 $('#billing-address').attr('required', true).removeAttr('disabled');
                 $('#validation-result-container, #vat-number-container, #validateVAT').addClass(hiddenClasses);
                 $('#vatNr').attr('required', false).attr('disabled', '');
                 $("#vatCountryCode").attr('required', false).attr('disabled', '');
             } else {
-                $('#billing-address-container').addClass(hiddenClasses);
-                $('#validation-result-container, #vat-number-container, #validateVAT').removeClass(hiddenClasses);
-                $('#billing-address').attr('required', false).attr('disabled');
-                $('#vatNr').attr('required', true).removeAttr('disabled');
-                $("#vatCountryCode").attr('required', true).removeAttr('disabled', '');
-
                 var countryCode = $(this).val();
+                $(this).attr('lastKnown',countryCode);
                 var validateVATButton = $("#validateVAT");
                 if($("#optgroup-eu-countries-list option[value="+countryCode+"]").length === 1) {
                     validateVATButton.text(validateVATButton.attr('data-text'));
-                } else {
+                } else if($("#add-company-billing-details").is(":checked")) {
                     validateVATButton.text(validateVATButton.attr('data-text-non-eu'));
                 }
             }
+            $("#add-company-billing-details").change();
+            $('#selected-country-code').text($(this).val());
         });
 
         var invoiceOnlyMode = $('#invoice-requested[type=hidden]') && $('#invoice-requested[type=hidden]').val() == 'true';
 
         var euVATCheckingEnabled = $("#invoice[data-eu-vat-checking-enabled=true]").length === 1;
-
-        if(!invoiceOnlyMode && euVATCheckingEnabled && $("input[type=hidden][name=vatNr]").length === 0) {
-            $("#billing-address-container").addClass(hiddenClasses);
-        }
 
         // invoice only mode
         if(invoiceOnlyMode) {
@@ -366,12 +365,26 @@
         }
 
         $("#add-company-billing-details").change(function() {
-            if($(this).is(':checked')) {
-                $('#billing-address').attr('required', false).attr('disabled');
-                $('#billing-address-container').addClass(hiddenClasses);
-                $("#eu-vat-check-countries").removeClass(hiddenClasses);
-                if(euVATCheckingEnabled) {
-                    $("#vatCountry").attr('required', true).removeAttr('disabled', '');
+            var checkbox = $(this);
+            if(checkbox.is(':checked')) {
+                var country = euBillingCountry.val() || '';
+                var isCountrySelected = country !== '';
+                var validateVATButton = $("#validateVAT");
+                if(isCountrySelected && $("#optgroup-eu-countries-list option[value="+country+"]").length === 1) {
+                    //EU country selected
+                    $('#eu-vat-check-countries').removeClass(hiddenClasses);
+                    $('#validation-result-container, #vat-number-container, #validateVAT').removeClass(hiddenClasses);
+                    $('#vatNr').attr('required', true).removeAttr('disabled');
+                    $("#vatCountryCode").attr('required', true).removeAttr('disabled', '');
+                    validateVATButton.text(validateVATButton.attr('data-text'));
+                    $('#billing-address').attr('required', false).attr('disabled');
+                    euBillingCountry.change();
+                } else if(isCountrySelected) {
+                    $('#eu-vat-check-countries').addClass(hiddenClasses);
+                    $('#vatNr').val("");
+                    callVATValidation(validateVATButton.attr('data-validation-url'), $(this.form), function() {
+                        checkbox.attr('checked', false);
+                    }, function() {})
                 }
             } else {
                 $('#billing-address').attr('required', true).removeAttr('disabled');
@@ -379,8 +392,29 @@
                 $("#eu-vat-check-countries").addClass(hiddenClasses);
                 $("#vatCountry").removeAttr('required').removeAttr('disabled', '');
             }
+
         });
         //
+
+        function callVATValidation(action, frm, errorHandler, completionHandler) {
+            $('#continue-button').attr('disabled', true);
+            jQuery.ajax({
+                url: action,
+                type: 'POST',
+                data: frm.serialize(),
+                success: function () {
+                    window.location.reload(true);
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    errorHandler(xhr);
+                },
+                complete: function (xhr) {
+                    $('#continue-button').attr('disabled', false);
+                    completionHandler();
+                }
+
+            });
+        }
 
         $('#validateVAT').click(function() {
             var frm = $(this.form);
@@ -395,28 +429,16 @@
                 var btn = $(this);
                 var previousText = btn.text();
                 btn.html('<i class="fa fa-circle-o-notch fa-spin"></i>');
-                $('#continue-button').attr('disabled', true);
-                jQuery.ajax({
-                    url: action,
-                    type: 'POST',
-                    data: frm.serialize(),
-                    success: function() {
-                        window.location.reload();
-                    },
-                    error: function(xhr, textStatus, errorThrown) {
-                        vatInput.addClass('has-error');
-                        vatInput.parent('div').addClass('has-error');
-                        if(xhr.status === 400) {
-                            resultContainer.html(resultContainer.attr('data-validation-error-msg'));
-                        } else {
-                            resultContainer.html(resultContainer.attr('data-generic-error-msg'));
-                        }
-                    },
-                    complete: function(xhr) {
-                        btn.text(previousText);
-                        $('#continue-button').attr('disabled', false);
+                callVATValidation(action, frm, function(xhr) {
+                    vatInput.addClass('has-error');
+                    vatInput.parent('div').addClass('has-error');
+                    if (xhr.status === 400) {
+                        resultContainer.html(resultContainer.attr('data-validation-error-msg'));
+                    } else {
+                        resultContainer.html(resultContainer.attr('data-generic-error-msg'));
                     }
-
+                }, function() {
+                    btn.text(previousText);
                 });
             }
         })
@@ -428,7 +450,7 @@
                 url: action,
                 type:'POST',
                 success: function() {
-                    window.location.reload();
+                    window.location.reload(true);
                 },
                 data:frm.serialize()
             });

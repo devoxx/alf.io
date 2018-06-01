@@ -233,7 +233,7 @@ public enum TemplateResource {
             Collections.singletonList(new SummaryRow("Ticket", "10.00", "9.20", 1, "9.20", "9.20", 1000, SummaryRow.SummaryType.TICKET)), false, "10.00", "0.80", false, false, "8", PriceContainer.VatStatus.INCLUDED, "1.00");
         String reservationUrl = "http://your-domain.tld/reservation-url/";
         String reservationShortId = "597e7e7b";
-        return prepareModelForConfirmationEmail(organization, event, reservation, vat, tickets, orderSummary, reservationUrl, reservationShortId, Optional.of("My Invoice\nAddress"), Optional.empty(), Optional.empty());
+        return prepareModelForConfirmationEmail(organization, event, reservation, vat, tickets, orderSummary, reservationUrl, reservationShortId, Optional.of("My Invoice\nAddress"), Optional.empty(), Optional.empty(), false);
     }
 
     //used by multiple enum:
@@ -254,7 +254,8 @@ public enum TemplateResource {
                                                                        String reservationShortID,
                                                                        Optional<String> invoiceAddress,
                                                                        Optional<String> bankAccountNr,
-                                                                       Optional<String> bankAccountOwner) {
+                                                                       Optional<String> bankAccountOwner,
+                                                                       boolean euBusiness) {
         Map<String, Object> model = new HashMap<>();
         model.put("organization", organization);
         model.put("event", event);
@@ -287,6 +288,7 @@ public enum TemplateResource {
         bankAccountNr.ifPresent(nr -> {
             model.put("bankAccountNr", nr);
         });
+        model.put("euBusiness", euBusiness);
 
         model.put("isOfflinePayment", reservation.getStatus() == TicketReservation.TicketReservationStatus.OFFLINE_PAYMENT);
         model.put("hasCustomerReference", StringUtils.isNotBlank(reservation.getCustomerReference()));

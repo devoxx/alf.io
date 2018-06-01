@@ -173,13 +173,41 @@
             {{/captchaRequestedFreeOfCharge}}
         </div>
 
-    {{#customerReferenceEnabled}}
-        <div class="form-group {{#field-has-error}}[customerReference] has-error{{/field-has-error}}">
-            <label for="customerReference" class="control-label">{{#i18n}}common.customer-reference{{/i18n}}</label>
-            <input type="text" name="customerReference" id="customerReference" class="form-control" maxlength="255" value="{{paymentForm.customerReference}}">
-            {{#field-has-error}}[customerReference]<span class="help-block text-danger">{{#i18n}}{{#field-error}}customerReference{{/field-error}}{{/i18n}}</span>{{/field-has-error}}
+        <div class="row">
+            <div class="col-xs-12 {{#customerReferenceEnabled}}col-md-6{{/customerReferenceEnabled}}">
+                <div class="form-group">
+                    <label for="vatCountry">{{#i18n}}reservation-page-complete.country{{/i18n}}</label>
+        {{#vatNrIsLinked}}
+                    <div class="form-control-static">{{paymentForm.vatCountryCode}}</div>
+        {{/vatNrIsLinked}}
+        {{^vatNrIsLinked}}
+                    <select name="vatCountryCode" id="vatCountry" value="{{paymentForm.vatCountryCode}}" class="form-control field-required" required>
+                        <option value="">{{#i18n}}reservation-page.country.select{{/i18n}}</option>
+                        <optgroup label="{{#i18n}}reservation-page.eu-countries{{/i18n}}" id="optgroup-eu-countries-list">
+                            {{#euCountriesForVat}}
+                                <option value="{{left}}">{{left}} - {{right}}</option>
+                            {{/euCountriesForVat}}
+                        </optgroup>
+                        <optgroup label="{{#i18n}}reservation-page.all-countries{{/i18n}}">
+                            {{#countriesForVat}}
+                                <option value="{{left}}">{{left}} - {{right}}</option>
+                            {{/countriesForVat}}
+                        </optgroup>
+                    </select>
+        {{/vatNrIsLinked}}
+                </div>
+
+            </div>
+            {{#customerReferenceEnabled}}
+            <div class="col-xs-12 col-md-6">
+                <div class="form-group {{#field-has-error}}[customerReference] has-error{{/field-has-error}}">
+                    <label for="customerReference" class="control-label">{{#i18n}}common.customer-reference{{/i18n}}</label>
+                    <input type="text" name="customerReference" id="customerReference" class="form-control" maxlength="255" value="{{paymentForm.customerReference}}">
+                    {{#field-has-error}}[customerReference]<span class="help-block text-danger">{{#i18n}}{{#field-error}}customerReference{{/field-error}}{{/i18n}}</span>{{/field-has-error}}
+                </div>
+            </div>
+            {{/customerReferenceEnabled}}
         </div>
-    {{/customerReferenceEnabled}}
 
     <div class="page-header">
         <h2>{{#i18n}}reservation-page.attendees{{/i18n}}</h2>
@@ -290,20 +318,8 @@
                 <div class="row" id="eu-vat-check-countries">
                     <div class="col-xs-12 col-sm-4">
                         <div class="form-group">
-                            <label for="vatCountry">{{#i18n}}reservation-page-complete.country{{/i18n}}</label>
-                            <select name="vatCountryCode" id="vatCountry" value="{{paymentForm.vatCountryCode}}" class="form-control field-required">
-                                <option value="">{{#i18n}}reservation-page.country.select{{/i18n}}</option>
-                                <optgroup label="{{#i18n}}reservation-page.eu-countries{{/i18n}}" id="optgroup-eu-countries-list">
-                                {{#euCountriesForVat}}
-                                    <option value="{{left}}">{{left}} - {{right}}</option>
-                                {{/euCountriesForVat}}
-                                </optgroup>
-                                <optgroup label="{{#i18n}}reservation-page.all-countries{{/i18n}}">
-                                {{#countriesForVat}}
-                                    <option value="{{left}}">{{left}} - {{right}}</option>
-                                {{/countriesForVat}}
-                                </optgroup>
-                            </select>
+                            <label>{{#i18n}}reservation-page-complete.country{{/i18n}}</label>
+                            <div class="form-control-static" id="selected-country-code"></div>
                         </div>
                     </div>
 
@@ -345,12 +361,14 @@
                         <p class="form-control-static">{{paymentForm.vatCountryCode}}</p>
                     </div>
                 </div>
-                <div class="col-xs-6 col-md-2">
-                    <div class="form-group">
-                        <label class="control-label">{{#i18n}}invoice.vat [{{vatTranslation}}]{{/i18n}}</label>
-                        <p class="form-control-static">{{paymentForm.vatNr}}</p>
+                {{#paymentForm.hasVatNr}}
+                    <div class="col-xs-6 col-md-2">
+                        <div class="form-group">
+                            <label class="control-label">{{#i18n}}invoice.vat [{{vatTranslation}}]{{/i18n}}</label>
+                            <p class="form-control-static">{{paymentForm.vatNr}}</p>
+                        </div>
                     </div>
-                </div>
+                {{/paymentForm.hasVatNr}}
             {{/vatNrIsLinked}}
             <div class="col-xs-12 {{#vatNrIsLinked}}col-md-8{{/vatNrIsLinked}}">
                 <div class="form-group {{#field-has-error}}[billingAddress] has-error{{/field-has-error}}" id="billing-address-container">
