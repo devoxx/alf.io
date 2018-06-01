@@ -146,9 +146,6 @@ public class ReservationApiController {
             .ifPresent(t -> {
                 VatDetail vd = t.getRight();
                 String billingAddress = vd.getName() + "\n" + vd.getAddress();
-                if(isNotBlank(vd.getName()) || isNotBlank(vd.getAddress())) {
-                    billingAddress = billingAddress.trim() + "\n" + new Locale("", country).getDisplayCountry(locale);
-                }
                 PriceContainer.VatStatus vatStatus = determineVatStatus(t.getLeft().getVatStatus(), t.getRight().isVatExempt());
                 ticketReservationRepository.updateBillingData(vatStatus, StringUtils.trimToNull(vd.getVatNr()), country, paymentForm.isInvoiceRequested(), reservationId);
                 OrderSummary orderSummary = ticketReservationManager.orderSummaryForReservationId(reservationId, t.getLeft(), Locale.forLanguageTag(t.getMiddle().getUserLanguage()));
