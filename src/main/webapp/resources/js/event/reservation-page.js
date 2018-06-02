@@ -350,6 +350,7 @@
             }
             $("#add-company-billing-details").change();
             $('#selected-country-code').text($(this).val());
+            $('#selected-country').text($(this).find('option[value='+countryCode+']').attr('data-description'));
         });
 
         var invoiceOnlyMode = $('#invoice-requested[type=hidden]') && $('#invoice-requested[type=hidden]').val() == 'true';
