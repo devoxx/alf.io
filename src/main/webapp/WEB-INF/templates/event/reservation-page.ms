@@ -173,6 +173,39 @@
             {{/captchaRequestedFreeOfCharge}}
         </div>
 
+        <div class="row invoice-without-vat">
+            <div class="col-xs-12">
+                <div class="form-group">
+                    <label for="billingAddressLine1">Address Line 1</label>
+                    <input id="billingAddressLine1" class="form-control required-when-visible" type="text">
+                </div>
+            </div>
+        </div>
+        <div class="row invoice-without-vat">
+            <div class="col-xs-12">
+                <div class="form-group">
+                    <label for="billingAddressLine2">Address Line 2</label>
+                    <input id="billingAddressLine2" class="form-control" type="text">
+                </div>
+            </div>
+        </div>
+        <div class="row invoice-without-vat">
+            <div class="col-xs-12">
+                <div class="form-group">
+                    <label for="billingAddressCity">City</label>
+                    <input id="billingAddressCity" class="form-control required-when-visible" type="text">
+                </div>
+            </div>
+        </div>
+        <div class="row invoice-without-vat">
+            <div class="col-xs-12">
+                <div class="form-group">
+                    <label for="billingAddressZip">ZIP/Postal Code</label>
+                    <input id="billingAddressZip" class="form-control required-when-visible" type="text">
+                </div>
+            </div>
+        </div>
+
         <div class="row">
             <div class="col-xs-12 {{#customerReferenceEnabled}}col-md-6{{/customerReferenceEnabled}}">
                 <div class="form-group">
@@ -381,7 +414,7 @@
             <div class="col-xs-12 {{#vatNrIsLinked}}col-md-8{{/vatNrIsLinked}}">
                 <div class="form-group {{#field-has-error}}[billingAddress] has-error{{/field-has-error}}" id="billing-address-container">
                     <label for="billing-address" class="control-label">{{#i18n}}{{billingAddressLabel}}{{/i18n}}</label>
-                    <textarea name="billingAddress" id="billing-address" class="form-control" maxlength="450" {{#invoiceIsAllowed}}data-invoice-enabled="true"{{/invoiceIsAllowed}}>{{paymentForm.billingAddress}}</textarea>
+                    <textarea name="billingAddress" id="billing-address" class="form-control" rows="3" maxlength="450" {{#invoiceIsAllowed}}data-invoice-enabled="true"{{/invoiceIsAllowed}}>{{paymentForm.billingAddress}}</textarea>
                     {{#field-has-error}}[billingAddress]<span class="help-block text-danger">{{#i18n}}{{#field-error}}billingAddress{{/field-error}}{{/i18n}}</span>{{/field-has-error}}
                 </div>
             </div>

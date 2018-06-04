@@ -464,6 +464,14 @@
             });
         });
 
+        if($("input[name=vatNr][type=hidden]").length == 1) {
+            $(".invoice-without-vat").hide();
+            $(".required-when-visible").removeAttr('required');
+        } else {
+            $("#billing-address-container").hide();
+            $(".required-when-visible").attr('required', true);
+        }
+
     });
 
     window.recaptchaLoadCallback = function() {
