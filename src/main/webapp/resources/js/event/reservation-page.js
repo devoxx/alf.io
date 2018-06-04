@@ -380,6 +380,7 @@
                     validateVATButton.text(validateVATButton.attr('data-text'));
                     $('#billing-address').attr('required', false).attr('disabled');
                     euBillingCountry.change();
+                    $("#continue-button").attr('disabled', true);
                 } else if(isCountrySelected) {
                     $('#eu-vat-check-countries').addClass(hiddenClasses);
                     $('#vatNr').val("");
@@ -392,6 +393,7 @@
                 $('#billing-address-container').removeClass(hiddenClasses);
                 $("#eu-vat-check-countries").addClass(hiddenClasses);
                 $("#vatCountry").removeAttr('required').removeAttr('disabled', '');
+                $("#continue-button").removeAttr('disabled');
             }
 
         });
@@ -410,7 +412,12 @@
                     errorHandler(xhr);
                 },
                 complete: function (xhr) {
-                    $('#continue-button').attr('disabled', false);
+                    var vatInput = $('#vatNr');
+                    if(vatInput.hasClass('has-error')) {
+                        $('#continue-button').attr('disabled', true);
+                    } else {
+                        $('#continue-button').attr('disabled', false);
+                    }
                     completionHandler();
                 }
 
