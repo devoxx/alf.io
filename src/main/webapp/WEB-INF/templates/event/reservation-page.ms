@@ -192,16 +192,16 @@
         <div class="row invoice-without-vat">
             <div class="col-xs-12">
                 <div class="form-group">
-                    <label for="billingAddressCity">City</label>
-                    <input id="billingAddressCity" class="form-control required-when-visible" type="text">
+                    <label for="billingAddressZip">ZIP/Postal Code</label>
+                    <input id="billingAddressZip" class="form-control required-when-visible" type="text">
                 </div>
             </div>
         </div>
         <div class="row invoice-without-vat">
             <div class="col-xs-12">
                 <div class="form-group">
-                    <label for="billingAddressZip">ZIP/Postal Code</label>
-                    <input id="billingAddressZip" class="form-control required-when-visible" type="text">
+                    <label for="billingAddressCity">City</label>
+                    <input id="billingAddressCity" class="form-control required-when-visible" type="text">
                 </div>
             </div>
         </div>
