@@ -176,7 +176,7 @@
         <div class="row invoice-without-vat">
             <div class="col-xs-12">
                 <div class="form-group">
-                    <label for="billingAddressLine1">Address Line 1</label>
+                    <label for="billingAddressLine1">{{#i18n}}reservation-page.address-line-1{{/i18n}}</label>
                     <input id="billingAddressLine1" class="form-control required-when-visible" type="text">
                 </div>
             </div>
@@ -184,7 +184,7 @@
         <div class="row invoice-without-vat">
             <div class="col-xs-12">
                 <div class="form-group">
-                    <label for="billingAddressLine2">Address Line 2</label>
+                    <label for="billingAddressLine2">{{#i18n}}reservation-page.address-line-2{{/i18n}}</label>
                     <input id="billingAddressLine2" class="form-control" type="text">
                 </div>
             </div>
@@ -192,7 +192,7 @@
         <div class="row invoice-without-vat">
             <div class="col-xs-12">
                 <div class="form-group">
-                    <label for="billingAddressZip">ZIP/Postal Code</label>
+                    <label for="billingAddressZip">{{#i18n}}reservation-page.zip-postal-code{{/i18n}}</label>
                     <input id="billingAddressZip" class="form-control required-when-visible" type="text">
                 </div>
             </div>
@@ -200,7 +200,7 @@
         <div class="row invoice-without-vat">
             <div class="col-xs-12">
                 <div class="form-group">
-                    <label for="billingAddressCity">City</label>
+                    <label for="billingAddressCity">{{#i18n}}reservation-page.city{{/i18n}}</label>
                     <input id="billingAddressCity" class="form-control required-when-visible" type="text">
                 </div>
             </div>
