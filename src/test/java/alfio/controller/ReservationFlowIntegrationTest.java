@@ -35,6 +35,7 @@ import alfio.manager.*;
 import alfio.manager.i18n.I18nManager;
 import alfio.manager.support.CheckInStatus;
 import alfio.manager.support.TicketAndCheckInResult;
+import alfio.manager.system.ConfigurationManager;
 import alfio.manager.user.UserManager;
 import alfio.model.*;
 import alfio.model.audit.ScanAudit;
@@ -172,6 +173,9 @@ public class ReservationFlowIntegrationTest {
     @Autowired
     private UsersApiController usersApiController;
 
+    @Autowired
+    private ConfigurationManager configurationManager;
+
     private ReservationApiController reservationApiController;
 
 
@@ -201,7 +205,7 @@ public class ReservationFlowIntegrationTest {
 
         //
         TemplateManager templateManager = Mockito.mock(TemplateManager.class);
-        reservationApiController = new ReservationApiController(eventRepository, ticketHelper, templateManager, i18nManager, euVatChecker, ticketReservationRepository, ticketReservationManager);
+        reservationApiController = new ReservationApiController(eventRepository, ticketHelper, templateManager, i18nManager, euVatChecker, ticketReservationRepository, ticketReservationManager, configurationManager);
     }
 
 
