@@ -137,22 +137,6 @@
             <h3>{{#i18n}}show-event.sold-out.header{{/i18n}}</h3>
         </div>
     {{/showNoCategoriesWarning}}
-    {{#containsExpiredCategories}}
-    <div class="expired">
-        <div class="text-center">
-            <a role="button" class="show-expired-categories" data-toggle="collapse" href="#expiredCategories" aria-expanded="false" aria-controls="expiredCategories">
-                <i class="fa fa-angle-double-down"></i> {{#i18n}}show-event.expired-categories{{/i18n}}
-            </a>
-        </div>
-        <div class="collapse" id="expiredCategories">
-            <ul class="list-group">
-                {{#expiredCategories}}
-                    {{> /event/ticket-category.ms }}
-                {{/expiredCategories}}
-            </ul>
-        </div>
-    </div>
-    {{/containsExpiredCategories}}
 
 {{#hasPromoCodeDiscount}}
 
