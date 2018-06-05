@@ -22,8 +22,10 @@ import alfio.controller.form.UpdateTicketOwnerForm;
 import alfio.manager.EuVatChecker;
 import alfio.manager.TicketReservationManager;
 import alfio.manager.i18n.I18nManager;
+import alfio.manager.system.ConfigurationManager;
 import alfio.model.*;
 import alfio.model.result.ValidationResult;
+import alfio.model.system.ConfigurationKeys;
 import alfio.model.transaction.PaymentProxy;
 import alfio.repository.EventRepository;
 import alfio.repository.TicketReservationRepository;
@@ -48,6 +50,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static alfio.model.PriceContainer.VatStatus.*;
+import static alfio.model.system.Configuration.getSystemConfiguration;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
@@ -62,6 +65,7 @@ public class ReservationApiController {
     private final EuVatChecker vatChecker;
     private final TicketReservationRepository ticketReservationRepository;
     private final TicketReservationManager ticketReservationManager;
+    private final ConfigurationManager configurationManager;
 
 
     @RequestMapping(value = "/event/{eventName}/ticket/{ticketIdentifier}/assign", method = RequestMethod.POST, headers = "X-Requested-With=XMLHttpRequest")
@@ -145,7 +149,7 @@ public class ReservationApiController {
             .filter(t -> t.getRight().isValid())
             .ifPresent(t -> {
                 VatDetail vd = t.getRight();
-                String billingAddress = vd.getName() + "\n" + vd.getAddress();
+                String billingAddress = isEUCountry(country) ? (vd.getName() + "\n" + vd.getAddress()) : paymentForm.getBillingAddress();
                 PriceContainer.VatStatus vatStatus = determineVatStatus(t.getLeft().getVatStatus(), t.getRight().isVatExempt());
                 ticketReservationRepository.updateBillingData(vatStatus, StringUtils.trimToNull(vd.getVatNr()), country, paymentForm.isInvoiceRequested(), reservationId);
                 OrderSummary orderSummary = ticketReservationManager.orderSummaryForReservationId(reservationId, t.getLeft(), Locale.forLanguageTag(t.getMiddle().getUserLanguage()));
@@ -170,6 +174,10 @@ public class ReservationApiController {
                 }
             })
             .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    private boolean isEUCountry(String country) {
+        return configurationManager.getRequiredValue(getSystemConfiguration(ConfigurationKeys.EU_COUNTRIES_LIST)).contains(country);
     }
 
     private static PriceContainer.VatStatus determineVatStatus(PriceContainer.VatStatus current, boolean isVatExempt) {

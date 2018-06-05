@@ -464,6 +464,26 @@
             });
         });
 
+        if($("input[name=vatNr][type=hidden]").length == 1) {
+            $(".invoice-without-vat").hide();
+            $(".required-when-visible").removeAttr('required');
+        } else {
+            $("#billing-address-container").hide();
+            $(".required-when-visible").attr('required', true);
+        }
+
+        $(".invoice-without-vat input, #vatCountry").change(function() {
+            var billingAddress = $("#billingAddressLine1").val()+"\n"
+                +$("#billingAddressLine2").val()+"\n"
+                +$("#billingAddressZip").val()+" " + $("#billingAddressCity").val()+"\n";
+
+            if($("#vatCountry").val()) {
+                billingAddress += $("#vatCountry option[value="+$("#vatCountry").val()+"]").text();
+            }
+            billingAddress = billingAddress.replace("\n\n","\n")
+            $("#billing-address").val(billingAddress);
+        });
+
     });
 
     window.recaptchaLoadCallback = function() {
