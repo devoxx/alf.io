@@ -488,22 +488,25 @@ public class TicketReservationManager {
         Map<String, Object> reservationEmailModel = prepareModelForReservationEmail(event, ticketReservation);
         List<Mailer.Attachment> attachments = new ArrayList<>(1);
         if(!summary.getCashPayment() && !summary.getFree()) { //#459 - include PDF invoice in reservation email
-            Map<String, String> model = new HashMap<>();
-            model.put("reservationId", reservationId);
-            model.put("eventId", Integer.toString(event.getId()));
-            model.put("language", Json.toJson(language));
-            model.put("reservationEmailModel", Json.toJson(reservationEmailModel));
-            if(ticketReservation.getHasInvoiceNumber()) {
-                attachments.add(new Mailer.Attachment("invoice.pdf", null, "application/pdf", model, Mailer.AttachmentIdentifier.INVOICE_PDF));
-            } else {
-                attachments.add(new Mailer.Attachment("receipt.pdf", null, "application/pdf", model, Mailer.AttachmentIdentifier.RECEIPT_PDF));
-            }
-
+            attachments = generateReceiptOrInvoice(event, ticketReservation, language, reservationId, reservationEmailModel);
         }
 
         notificationManager.sendSimpleEmail(event, ticketReservation.getEmail(), messageSource.getMessage("reservation-email-subject",
                 new Object[]{ticketReservation.getInvoiceNumber(), event.getDisplayName()}, language),
             () -> templateManager.renderTemplate(event, TemplateResource.CONFIRMATION_EMAIL, reservationEmailModel, language), attachments);
+    }
+
+    public static List<Mailer.Attachment> generateReceiptOrInvoice(Event event, TicketReservation ticketReservation, Locale language, String reservationId, Map<String, Object> reservationEmailModel) {
+        Map<String, String> model = new HashMap<>();
+        model.put("reservationId", reservationId);
+        model.put("eventId", Integer.toString(event.getId()));
+        model.put("language", Json.toJson(language));
+        model.put("reservationEmailModel", Json.toJson(reservationEmailModel));
+        if(ticketReservation.getHasInvoiceNumber()) {
+            return Collections.singletonList(new Mailer.Attachment("invoice.pdf", null, "application/pdf", model, Mailer.AttachmentIdentifier.INVOICE_PDF));
+        } else {
+            return Collections.singletonList(new Mailer.Attachment("receipt.pdf", null, "application/pdf", model, Mailer.AttachmentIdentifier.RECEIPT_PDF));
+        }
     }
 
     private Locale findReservationLanguage(String reservationId) {
