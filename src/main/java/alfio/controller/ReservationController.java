@@ -582,9 +582,11 @@ public class ReservationController {
         Organization organization = organizationRepository.getById(event.getOrganizationId());
         List<String> cc = notificationManager.getCCForEventOrganizer(event);
 
+        Locale locale = RequestContextUtils.getLocale(request);
+        Map<String, Object> model = ticketReservationManager.prepareModelForReservationEmail(event, reservation);
         notificationManager.sendSimpleEmail(event, organization.getEmail(), cc, "Reservation complete " + reservation.getInvoiceNumber(), () ->
-            templateManager.renderTemplate(event, TemplateResource.CONFIRMATION_EMAIL_FOR_ORGANIZER, ticketReservationManager.prepareModelForReservationEmail(event, reservation),
-                RequestContextUtils.getLocale(request))
+            templateManager.renderTemplate(event, TemplateResource.CONFIRMATION_EMAIL_FOR_ORGANIZER, model,
+                locale), TicketReservationManager.generateReceiptOrInvoice(event, reservation, locale, reservation.getId(), model)
         );
     }
 
