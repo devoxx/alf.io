@@ -202,12 +202,20 @@
             }
         }
 
+        $("select").map(function() {
+            var value = $(this).attr('value');
+            if(value && value.length > 0) {
+                $(this).val(value);
+            }
+        });
+
         $("#vatCountry").change(function() {
             var val = $(this).val();
             $("#selected-country-code").text(val);
         });
 
         $("#add-company-billing-details, #invoice-requested").change(function() {
+            $("#selected-country-code").text($("#vatCountry").val())
             if($(this).is(':checked')) {
                 $("#billingAddressCompany").attr('required', true);
                 $("#vat-number-container").removeClass(hiddenClasses);
@@ -219,7 +227,7 @@
         });
 
         if($("#add-company-billing-details:checked, #invoice-requested:checked").length === 1) {
-            $("#selected-country-code").text($("#vatCountry").attr('value'))
+            $("#selected-country-code").text($("#vatCountry").val())
             $("#add-company-billing-details:checked, #invoice-requested:checked").change();
         }
 
