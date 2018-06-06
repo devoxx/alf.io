@@ -1,32 +1,33 @@
 {{>/event/page-top}}
 
-{{#includeStripe}}
+<!--{{#includeStripe}}
  <script src="https://js.stripe.com/v2/"></script>
-{{/includeStripe}}
+{{/includeStripe}}-->
  <script src="{{request.contextPath}}/resources/bower_components/jquery/dist/jquery.min.js"></script>
  <script src="{{request.contextPath}}/resources/js/h5f/h5f.min.js"></script>
  <script src="{{request.contextPath}}/resources/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
  <script src="{{request.contextPath}}/resources/js/event/bootstrap-handler.js"></script>
- <script src="{{request.contextPath}}/resources/js/event/reservation-page.js"
-{{#includeStripe}}
-    id="stripe-key"
-    data-stripe-key="{{stripe_p_key}}"
-    
-    data-stripe-message-incorrect_number="{{#i18n}}error.STEP2_STRIPE_incorrect_number{{/i18n}}"
-    data-stripe-message-invalid_number="{{#i18n}}error.STEP2_STRIPE_invalid_number{{/i18n}}"
-    data-stripe-message-invalid_expiry_month="{{#i18n}}error.STEP2_STRIPE_invalid_expiry_month{{/i18n}}"
-    data-stripe-message-invalid_expiry_year="{{#i18n}}error.STEP2_STRIPE_invalid_expiry_year{{/i18n}}"
-    data-stripe-message-invalid_cvc="{{#i18n}}error.STEP2_STRIPE_invalid_cvc{{/i18n}}"
-    data-stripe-message-expired_card="{{#i18n}}error.STEP2_STRIPE_expired_card{{/i18n}}"
-    data-stripe-message-incorrect_cvc="{{#i18n}}error.STEP2_STRIPE_incorrect_cvc{{/i18n}}"
-    data-stripe-message-incorrect_zip="{{#i18n}}error.STEP2_STRIPE_incorrect_zip{{/i18n}}"
-    data-stripe-message-card_declined="{{#i18n}}error.STEP2_STRIPE_card_declined{{/i18n}}"
-    data-stripe-message-missing="{{#i18n}}error.STEP2_STRIPE_missing{{/i18n}}"
-    data-stripe-message-processing_error="{{#i18n}}error.STEP2_STRIPE_processing_error{{/i18n}}"
-    data-stripe-message-abort="{{#i18n}}error.STEP2_STRIPE_abort{{/i18n}}"
-    data-stripe-message-rate_limit="{{#i18n}}error.STEP2_STRIPE_rate_limit{{/i18n}}"
-{{/includeStripe}}
- ></script>
+ <script src="{{request.contextPath}}/resources/js/event/reservation-page.js" ></script>
+
+ <!--{{#includeStripe}}
+     id="stripe-key"
+     data-stripe-key="{{stripe_p_key}}"
+
+     data-stripe-message-incorrect_number="{{#i18n}}error.STEP2_STRIPE_incorrect_number{{/i18n}}"
+     data-stripe-message-invalid_number="{{#i18n}}error.STEP2_STRIPE_invalid_number{{/i18n}}"
+     data-stripe-message-invalid_expiry_month="{{#i18n}}error.STEP2_STRIPE_invalid_expiry_month{{/i18n}}"
+     data-stripe-message-invalid_expiry_year="{{#i18n}}error.STEP2_STRIPE_invalid_expiry_year{{/i18n}}"
+     data-stripe-message-invalid_cvc="{{#i18n}}error.STEP2_STRIPE_invalid_cvc{{/i18n}}"
+     data-stripe-message-expired_card="{{#i18n}}error.STEP2_STRIPE_expired_card{{/i18n}}"
+     data-stripe-message-incorrect_cvc="{{#i18n}}error.STEP2_STRIPE_incorrect_cvc{{/i18n}}"
+     data-stripe-message-incorrect_zip="{{#i18n}}error.STEP2_STRIPE_incorrect_zip{{/i18n}}"
+     data-stripe-message-card_declined="{{#i18n}}error.STEP2_STRIPE_card_declined{{/i18n}}"
+     data-stripe-message-missing="{{#i18n}}error.STEP2_STRIPE_missing{{/i18n}}"
+     data-stripe-message-processing_error="{{#i18n}}error.STEP2_STRIPE_processing_error{{/i18n}}"
+     data-stripe-message-abort="{{#i18n}}error.STEP2_STRIPE_abort{{/i18n}}"
+     data-stripe-message-rate_limit="{{#i18n}}error.STEP2_STRIPE_rate_limit{{/i18n}}"
+ {{/includeStripe}}-->
+
 <script src="{{request.contextPath}}/resources/js/event/attendee-form.js"></script>
 <script src="{{request.contextPath}}/resources/js/countdownjs/countdown.min.js"></script>
 {{>/event/header}}
@@ -35,8 +36,10 @@
     <a><span class="badge">1</span> <span class="hidden-xs">{{#i18n}}breadcrumb.step1{{/i18n}}</span></a>
     <a class="current"><span class="badge badge-inverse">2</span> {{#i18n}}breadcrumb.step2{{/i18n}}</a>
     <a><span class="badge">3</span> <span class="hidden-xs">{{#i18n}}breadcrumb.step3{{/i18n}}</span></a>
+    <a><span class="badge">4</span> <span class="hidden-xs">{{#i18n}}breadcrumb.step4{{/i18n}}</span></a>
 </div>
 
+<!--
 <div class="page-header">
     <h2>{{#i18n}}reservation-page.title{{/i18n}}</h2>
 </div>
@@ -82,6 +85,7 @@
         {{/orderSummary.free}}
     </tfoot>
 </table>
+-->
 
 {{#hasErrors}}
     {{#error.globalErrors}}
@@ -103,8 +107,8 @@
     </span>
 </div>
 
-<form action="{{request.contextPath}}/event/{{event.shortName}}/reservation/{{reservation.id}}" method="POST" id="payment-form">
-    {{#paypalCheckoutConfirmation}}
+<form action="{{request.contextPath}}/event/{{event.shortName}}/reservation/{{reservation.id}}/validate-to-overview" method="POST" id="payment-form">
+    <!--{{#paypalCheckoutConfirmation}}
         {{#useFirstAndLastName}}
         <input type="hidden" name="firstName" value="{{firstName}}">
         <input type="hidden" name="lastName" value="{{lastName}}">
@@ -125,7 +129,7 @@
         <h3><i class="fa fa-check"></i> {{#i18n}}reservation-page.paypal.confirm{{/i18n}}</h3>
     </div>
 
-    {{/paypalCheckoutConfirmation}}
+    {{/paypalCheckoutConfirmation}}-->
     {{^paypalCheckoutConfirmation}}
 
     <div class="page-header">
@@ -173,47 +177,54 @@
             {{/captchaRequestedFreeOfCharge}}
         </div>
 
-        <div class="row invoice-without-vat">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="form-group">
+                    <label for="billingAddressCompany">{{#i18n}}reservation-page-complete.company{{/i18n}}</label>
+                    <input id="billingAddressCompany" name="billingAddressCompany" class="form-control" type="text">
+                </div>
+            </div>
+        </div>
+        <div class="row">
             <div class="col-xs-12">
                 <div class="form-group">
                     <label for="billingAddressLine1">{{#i18n}}reservation-page.address-line-1{{/i18n}}</label>
-                    <input id="billingAddressLine1" class="form-control required-when-visible" type="text">
+                    <input id="billingAddressLine1" name="billingAddressLine1" class="form-control" type="text">
                 </div>
             </div>
         </div>
-        <div class="row invoice-without-vat">
+        <div class="row">
             <div class="col-xs-12">
                 <div class="form-group">
                     <label for="billingAddressLine2">{{#i18n}}reservation-page.address-line-2{{/i18n}}</label>
-                    <input id="billingAddressLine2" class="form-control" type="text">
+                    <input id="billingAddressLine2" name="billingAddressLine2" class="form-control" type="text">
                 </div>
             </div>
         </div>
-        <div class="row invoice-without-vat">
+        <div class="row">
             <div class="col-xs-12">
                 <div class="form-group">
                     <label for="billingAddressZip">{{#i18n}}reservation-page.zip-postal-code{{/i18n}}</label>
-                    <input id="billingAddressZip" class="form-control required-when-visible" type="text">
+                    <input id="billingAddressZip" name="billingAddressZip" class="form-control" type="text">
                 </div>
             </div>
         </div>
-        <div class="row invoice-without-vat">
+        <div class="row">
             <div class="col-xs-12">
                 <div class="form-group">
                     <label for="billingAddressCity">{{#i18n}}reservation-page.city{{/i18n}}</label>
-                    <input id="billingAddressCity" class="form-control required-when-visible" type="text">
+                    <input id="billingAddressCity" name="billingAddressCity" class="form-control" type="text">
                 </div>
             </div>
         </div>
-
         <div class="row">
             <div class="col-xs-12 {{#customerReferenceEnabled}}col-md-6{{/customerReferenceEnabled}}">
                 <div class="form-group">
                     <label for="vatCountry">{{#i18n}}reservation-page-complete.country{{/i18n}}</label>
-        {{#vatNrIsLinked}}
+        <!--{{#vatNrIsLinked}}
                     <div class="form-control-static">{{#country-name}}{{paymentForm.vatCountryCode}} locale:{{#i18n}}locale{{/i18n}}{{/country-name}}</div>
         {{/vatNrIsLinked}}
-        {{^vatNrIsLinked}}
+        {{^vatNrIsLinked}}-->
                     <select name="vatCountryCode" id="vatCountry" value="{{paymentForm.vatCountryCode}}" class="form-control field-required" required>
                         <option value="">{{#i18n}}reservation-page.country.select{{/i18n}}</option>
                         <optgroup label="{{#i18n}}reservation-page.eu-countries{{/i18n}}" id="optgroup-eu-countries-list">
@@ -227,7 +238,7 @@
                             {{/countriesForVat}}
                         </optgroup>
                     </select>
-        {{/vatNrIsLinked}}
+        <!--{{/vatNrIsLinked}}-->
                 </div>
 
             </div>
@@ -241,6 +252,44 @@
             </div>
             {{/customerReferenceEnabled}}
         </div>
+        {{#invoiceIsAllowed}}
+            <div class="row">
+                <div class="col-xs-12">
+                    {{#onlyInvoice}}
+                        <input type="hidden" name="invoiceRequested" id="invoice-requested" value="true">
+                        {{#euVatCheckingEnabled}}
+                            <div class="checkbox wMarginTop">
+                                <label>
+                                    <input type="checkbox" name="addCompanyBillingDetails" id="add-company-billing-details" value="true">
+                                    {{#i18n}}reservation.add-company-billing-details [{{vatTranslation}}]{{/i18n}}
+                                </label>
+                            </div>
+                        {{/euVatCheckingEnabled}}
+                    {{/onlyInvoice}}
+                    {{^onlyInvoice}}
+                        <div class="checkbox wMarginTop">
+                            <label>
+                                <input type="checkbox" name="invoiceRequested" id="invoice-requested" value="true" {{#paymentForm.invoiceRequested}}checked{{/paymentForm.invoiceRequested}}>
+                                {{#i18n}}reservation-page.i-need-an-invoice{{/i18n}}
+                            </label>
+                        </div>
+                    {{/onlyInvoice}}
+                </div>
+            </div>
+            <div class="row">
+                <div id="vat-number-container" class="hidden-xs hidden-sm hidden-md hidden-lg">
+                    <div class="col-xs-12">
+                        <div class="form-group">
+                            <label for="vatNr">{{#i18n}}invoice.vat [{{vatTranslation}}]{{/i18n}}</label>
+                            <div class="input-group">
+                                <div class="input-group-addon" id="selected-country-code"></div>
+                                <input id="vatNr" type="text" name="vatNr" class="form-control" value="{{paymentForm.vatNr}}"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {{/invoiceIsAllowed}}
 
     <div class="page-header">
         <h2>{{#i18n}}reservation-page.attendees{{/i18n}}</h2>
@@ -260,7 +309,7 @@
             {{#ticketsByCategory}}
                 {{#value}}
                     <li class="list-group-item">
-                        <h3><i class="fa fa-ticket"></i> {{#i18n}}reservation-page-complete.ticket-nr{{/i18n}}<span class="ticket-counter"></span> <span class="hidden-xs hidden-xs">- <small>{{key.name}}</small></span>{{^attendeeAutocompleteEnabled}}{{#-first}}<button type="button" id="copy-from-contact-data" class="btn btn-xs btn-default tooltip-handler pull-right" title="{{#i18n}}reservation-page.copy-attendee{{/i18n}}"><i class="fa fa-clone"></i><span class="sr-only">{{#i18n}}reservation-page.copy-attendee{{/i18n}}</span></button>{{/-first}}{{/attendeeAutocompleteEnabled}}</h3>
+                        <h3><i class="fa fa-ticket"></i> {{#i18n}}reservation-page-complete.ticket-nr{{/i18n}}<span class="ticket-counter"></span> <span class="hidden-xs hidden-xs">- <small>{{key.name}} - {{key.price}} {{event.currency}}</small></span>{{^attendeeAutocompleteEnabled}}{{#-first}}<button type="button" id="copy-from-contact-data" class="btn btn-xs btn-default tooltip-handler pull-right" title="{{#i18n}}reservation-page.copy-attendee{{/i18n}}"><i class="fa fa-clone"></i><span class="sr-only">{{#i18n}}reservation-page.copy-attendee{{/i18n}}</span></button>{{/-first}}{{/attendeeAutocompleteEnabled}}</h3>
                         <div class="form-horizontal">
                             <div data-collapse-enabled="true" class="collapsible-container">
                                 {{> /event/attendee-fields }}
@@ -273,8 +322,9 @@
     </div>
     <div class="clearfix"></div>
 
-
+<!-- PAYMENT BEGIN
     {{^orderSummary.free}}
+
 
     <div class="page-header wMarginTop">
         <h2>{{#i18n}}reservation-page.payment{{/i18n}}</h2>
@@ -432,7 +482,10 @@
         </div>
     </div>
     {{/orderSummary.free}}
+
     <hr/>
+
+
 
 {{#event.privacyPolicyLinkOrNull}}
     <div class="checkbox wMarginTop wMarginBottom">
@@ -452,7 +505,14 @@
 
 
     {{/paypalCheckoutConfirmation}}
+-->
 
+<div class="row">
+    <div class="col-md-4 col-md-push-8 col-xs-12 wMarginBottom"><button type="submit" class="btn btn-success btn-block" id="continue-button">{{#i18n}}reservation-page.continue{{/i18n}}</button></div>
+    <div class="col-md-4 col-md-pull-4 col-xs-12"><button type="submit" class="btn btn-default btn-block" id="cancel-reservation">{{#i18n}}reservation-page.cancel{{/i18n}}</button></div>
+</div>
+
+<!--
     {{#orderSummary.free}}
         <div class="row">
             <div class="col-md-4 col-md-push-8 col-xs-12 wMarginBottom"><button type="submit" class="btn btn-success btn-block" id="continue-button">{{#i18n}}reservation-page.continue{{/i18n}}</button></div>
@@ -474,15 +534,16 @@
             <div class="col-md-4 col-md-pull-4 col-xs-12"><button type="submit" class="btn btn-default btn-block" id="cancel-reservation">{{#i18n}}reservation-page.cancel{{/i18n}}</button></div>
         </div>
     {{/orderSummary.free}}
-
+-->
  
     <input type="hidden" name="{{_csrf.parameterName}}" value="{{_csrf.token}}">
     
     <div class="clearfix"></div>
 
 </form>
+<!--
 {{#captchaRequestedForOffline}}
 <script src="https://www.google.com/recaptcha/api.js?onload=recaptchaLoadCallback&render=explicit" async defer></script>
 {{/captchaRequestedForOffline}}
-
+-->
 {{>/event/page-bottom}}

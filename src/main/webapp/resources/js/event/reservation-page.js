@@ -170,7 +170,7 @@
             }
         }
 
-        
+
         // based on http://tjvantoll.com/2012/08/05/html5-form-validation-showing-all-error-messages/
         // http://stackoverflow.com/questions/13798313/set-custom-html5-required-field-validation-message
         var createAllErrors = function() {
@@ -201,7 +201,7 @@
                 }
             });
         };
-        
+
         $("form").each(createAllErrors);
         $("input,select,textarea").change(function() {
             if( !this.validity.valid) {
@@ -298,15 +298,29 @@
             }
         }
 
+        $("#vatCountry").change(function() {
+            $("#selected-country-code").text($(this).val());
+        });
 
-        function disableBillingFields() {
+        $("#add-company-billing-details, #invoice-requested").change(function() {
+            if($(this).is(':checked')) {
+                $("#billingAddressCompany").attr('required', true);
+                $("#vat-number-container").removeClass(hiddenClasses);
+            } else {
+                $("#billingAddressCompany").removeAttr('required');
+                $("#vat-number-container").addClass(hiddenClasses);
+            }
+        });
+
+
+        /*function disableBillingFields() {
             $('#vatNr').attr('required', false).attr('disabled', '');
         }
 
-        disableBillingFields();
+        disableBillingFields();*/
 
 
-        $('#invoice-requested').change(function() {
+        /*$('#invoice-requested').change(function() {
             var element = $('#invoice');
             if($(this).is(':checked')) {
                 element.find('.field-required').attr('required', true);
@@ -326,9 +340,9 @@
                 element.addClass('hidden');
                 disableBillingFields();
             }
-        });
+        });*/
 
-        var euBillingCountry = $('#vatCountry');
+        /*var euBillingCountry = $('#vatCountry');
         euBillingCountry.change(function(event) {
             if($(this).attr('lastKnown') === $(this).val()) {
                 return;
@@ -394,12 +408,12 @@
                 $("#eu-vat-check-countries").addClass(hiddenClasses);
                 $("#vatCountry").removeAttr('required').removeAttr('disabled', '');
                 $("#continue-button").removeAttr('disabled');
-            }
+            }*/
 
-        });
+        /*});*/
         //
 
-        function callVATValidation(action, frm, errorHandler, completionHandler) {
+        /*function callVATValidation(action, frm, errorHandler, completionHandler) {
             $('#continue-button').attr('disabled', true);
             jQuery.ajax({
                 url: action,
@@ -462,28 +476,7 @@
                 },
                 data:frm.serialize()
             });
-        });
-
-        if($("input[name=vatNr][type=hidden]").length == 1) {
-            $(".invoice-without-vat").hide();
-            $(".required-when-visible").removeAttr('required');
-        } else {
-            $("#billing-address-container").hide();
-            $(".required-when-visible").attr('required', true);
-        }
-
-        $(".invoice-without-vat input, #vatCountry").change(function() {
-            var billingAddress = $("#billingAddressLine1").val()+"\n"
-                +$("#billingAddressLine2").val()+"\n"
-                +$("#billingAddressZip").val()+" " + $("#billingAddressCity").val()+"\n";
-
-            if($("#vatCountry").val()) {
-                billingAddress += $("#vatCountry option[value="+$("#vatCountry").val()+"]").text();
-            }
-            billingAddress = billingAddress.replace("\n\n","\n")
-            $("#billing-address").val(billingAddress);
-        });
-
+        });*/
     });
 
     window.recaptchaLoadCallback = function() {

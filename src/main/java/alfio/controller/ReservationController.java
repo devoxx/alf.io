@@ -269,6 +269,39 @@ public class ReservationController {
         }).orElse("redirect:/");
     }
 
+
+    @RequestMapping(value = "/event/{eventName}/reservation/{reservationId}/validate-to-overview", method = RequestMethod.POST)
+    public String validateToOverview(@PathVariable("eventName") String eventName, @PathVariable("reservationId") String reservationId,
+                                     PaymentForm paymentForm, BindingResult bindingResult,
+                                     Model model, HttpServletRequest request, Locale locale, RedirectAttributes redirectAttributes) {
+
+        Optional<Event> eventOptional = eventRepository.findOptionalByShortName(eventName);
+        Optional<String> redirectForFailure = checkReservation(paymentForm, eventName, reservationId, request, eventOptional);
+        if(redirectForFailure.isPresent()) { //ugly
+            return redirectForFailure.get();
+        }
+        //FIXME add VALIDATION, VAT CHECK and UPDATE
+
+        //FIXME implement validation
+        return "redirect:/event/" + eventName + "/reservation/" + reservationId + "/overview";
+    }
+
+    @RequestMapping(value = "/event/{eventName}/reservation/{reservationId}/overview", method = RequestMethod.GET)
+    public String showOverview(@PathVariable("eventName") String eventName, @PathVariable("reservationId") String reservationId, Locale locale, Model model) {
+        return eventRepository.findOptionalByShortName(eventName)
+            .map(event -> ticketReservationManager.findById(reservationId)
+                .map(reservation -> {
+                    OrderSummary orderSummary = ticketReservationManager.orderSummaryForReservationId(reservationId, event, locale);
+                    model.addAttribute("orderSummary", orderSummary)
+                        .addAttribute("reservationId", reservationId)
+                        .addAttribute("reservation", reservation)
+                        .addAttribute("pageTitle", "reservation-page.header.title")
+                        .addAttribute("event", event);
+                    return "/event/overview";
+                }).orElseGet(() -> redirectReservation(Optional.empty(), eventName, reservationId)))
+            .orElse("redirect:/");
+    }
+
     @RequestMapping(value = "/event/{eventName}/reservation/{reservationId}/failure", method = RequestMethod.GET)
     public String showFailurePage(@PathVariable("eventName") String eventName,
                                        @PathVariable("reservationId") String reservationId,
@@ -404,25 +437,39 @@ public class ReservationController {
     }
 
 
+    private Optional<String> checkReservation(PaymentForm paymentForm, String eventName, String reservationId, HttpServletRequest request, Optional<Event> eventOptional) {
+
+        if (!eventOptional.isPresent()) {
+            return Optional.of("redirect:/");
+        }
+
+        Optional<TicketReservation> ticketReservation = ticketReservationManager.findById(reservationId);
+        if (!ticketReservation.isPresent()) {
+            return Optional.of(redirectReservation(ticketReservation, eventName, reservationId));
+        }
+        if (paymentForm.shouldCancelReservation()) {
+            ticketReservationManager.cancelPendingReservation(reservationId, false);
+            SessionUtil.removeSpecialPriceData(request);
+            return Optional.of("redirect:/event/" + eventName + "/");
+        }
+        return Optional.empty();
+    }
+
     @RequestMapping(value = "/event/{eventName}/reservation/{reservationId}", method = RequestMethod.POST)
     public String handleReservation(@PathVariable("eventName") String eventName,
             @PathVariable("reservationId") String reservationId, PaymentForm paymentForm, BindingResult bindingResult,
             Model model, HttpServletRequest request, Locale locale, RedirectAttributes redirectAttributes) {
 
         Optional<Event> eventOptional = eventRepository.findOptionalByShortName(eventName);
-        if (!eventOptional.isPresent()) {
-            return "redirect:/";
+        Optional<String> redirectForFailure = checkReservation(paymentForm, eventName, reservationId, request, eventOptional);
+        if(redirectForFailure.isPresent()) { //ugly
+            return redirectForFailure.get();
         }
+
         Event event = eventOptional.get();
         Optional<TicketReservation> ticketReservation = ticketReservationManager.findById(reservationId);
-        if (!ticketReservation.isPresent()) {
-            return redirectReservation(ticketReservation, eventName, reservationId);
-        }
-        if (paymentForm.shouldCancelReservation()) {
-            ticketReservationManager.cancelPendingReservation(reservationId, false);
-            SessionUtil.removeSpecialPriceData(request);
-            return "redirect:/event/" + eventName + "/";
-        }
+
+
         if (!ticketReservation.get().getValidity().after(new Date())) {
             bindingResult.reject(ErrorsCode.STEP_2_ORDER_EXPIRED);
         }
