@@ -299,7 +299,8 @@
         }
 
         $("#vatCountry").change(function() {
-            $("#selected-country-code").text($(this).val());
+            var val = $(this).val();
+            $("#selected-country-code").text(val);
         });
 
         $("#add-company-billing-details, #invoice-requested").change(function() {
@@ -311,6 +312,11 @@
                 $("#vat-number-container").addClass(hiddenClasses);
             }
         });
+
+        if($("#add-company-billing-details:checked, #invoice-requested:checked").length === 1) {
+            $("#selected-country-code").text($("#vatCountry").attr('value'))
+            $("#add-company-billing-details:checked, #invoice-requested:checked").change();
+        }
 
 
         /*function disableBillingFields() {

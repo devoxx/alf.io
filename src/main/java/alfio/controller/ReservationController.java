@@ -282,6 +282,18 @@ public class ReservationController {
         }
         //FIXME add VALIDATION, VAT CHECK and UPDATE
 
+
+        Event event = eventOptional.get();
+
+        CustomerName customerName = new CustomerName(paymentForm.getFullName(), paymentForm.getFirstName(), paymentForm.getLastName(), event);
+
+        ticketReservationManager.updateReservation(reservationId, customerName, paymentForm.getEmail(),
+            paymentForm.getBillingAddressCompany(), paymentForm.getBillingAddressLine1(), paymentForm.getBillingAddressLine2(),
+            paymentForm.getBillingAddressZip(), paymentForm.getBillingAddressCity(), paymentForm.getVatCountryCode(),
+            paymentForm.getVatNr(), paymentForm.isInvoiceRequested(), true);
+
+        assignTickets(event.getShortName(), reservationId, paymentForm, bindingResult, request, true);
+
         //FIXME implement validation
         return "redirect:/event/" + eventName + "/reservation/" + reservationId + "/overview";
     }

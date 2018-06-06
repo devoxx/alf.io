@@ -221,10 +221,7 @@
             <div class="col-xs-12 {{#customerReferenceEnabled}}col-md-6{{/customerReferenceEnabled}}">
                 <div class="form-group">
                     <label for="vatCountry">{{#i18n}}reservation-page-complete.country{{/i18n}}</label>
-        <!--{{#vatNrIsLinked}}
-                    <div class="form-control-static">{{#country-name}}{{paymentForm.vatCountryCode}} locale:{{#i18n}}locale{{/i18n}}{{/country-name}}</div>
-        {{/vatNrIsLinked}}
-        {{^vatNrIsLinked}}-->
+
                     <select name="vatCountryCode" id="vatCountry" value="{{paymentForm.vatCountryCode}}" class="form-control field-required" required>
                         <option value="">{{#i18n}}reservation-page.country.select{{/i18n}}</option>
                         <optgroup label="{{#i18n}}reservation-page.eu-countries{{/i18n}}" id="optgroup-eu-countries-list">
@@ -238,7 +235,6 @@
                             {{/countriesForVat}}
                         </optgroup>
                     </select>
-        <!--{{/vatNrIsLinked}}-->
                 </div>
 
             </div>
@@ -260,7 +256,7 @@
                         {{#euVatCheckingEnabled}}
                             <div class="checkbox wMarginTop">
                                 <label>
-                                    <input type="checkbox" name="addCompanyBillingDetails" id="add-company-billing-details" value="true">
+                                    <input type="checkbox" name="addCompanyBillingDetails" {{#paymentForm.invoiceRequested}}checked{{/paymentForm.invoiceRequested}} id="add-company-billing-details" value="true">
                                     {{#i18n}}reservation.add-company-billing-details [{{vatTranslation}}]{{/i18n}}
                                 </label>
                             </div>

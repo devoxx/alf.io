@@ -176,4 +176,24 @@ public interface TicketReservationRepository {
 
     @Query("select * from tickets_reservation where id in (:ids)")
     List<TicketReservation> findByIds(@Bind("ids") Collection<String> ids);
+
+    @Query("update tickets_reservation set full_name = :fullName, first_name = :firstName, last_name = :lastName, email_address = :email, " +
+        " billing_address = :completeBillingAddress, vat_country = :vatCountry, vat_nr = :vatNr, " +
+        " invoice_requested = :invoiceRequested " +
+        " where id = :reservationId")
+    int updateTicketReservationWithValidation(@Bind("reservationId") String reservationId,
+                                              @Bind("fullName") String fullName,
+                                              @Bind("firstName") String firstName,
+                                              @Bind("lastName") String lastName,
+                                              @Bind("email") String email,
+                                              @Bind("billingAddressCompany") String billingAddressCompany,
+                                              @Bind("billingAddressLine1") String billingAddressLine1,
+                                              @Bind("billingAddressLine2") String billingAddressLine2,
+                                              @Bind("billingAddressZip") String billingAddressZip,
+                                              @Bind("billingAddressCity") String billingAddressCity,
+                                              @Bind("completeBillingAddress") String completeBillingAddress,
+                                              @Bind("vatCountry") String vatCountry,
+                                              @Bind("vatNr") String vatNr,
+                                              @Bind("invoiceRequested") boolean invoiceRequested,
+                                              @Bind("validated") boolean validated);
 }
