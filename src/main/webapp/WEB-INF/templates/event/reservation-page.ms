@@ -164,7 +164,7 @@
                         {{#euVatCheckingEnabled}}
                             <div class="checkbox wMarginTop">
                                 <label>
-                                    <input type="checkbox" name="addCompanyBillingDetails" {{#paymentForm.invoiceRequested}}checked{{/paymentForm.invoiceRequested}} id="add-company-billing-details" value="true">
+                                    <input type="checkbox" name="addCompanyBillingDetails" id="add-company-billing-details" value="true">
                                     {{#i18n}}reservation.add-company-billing-details [{{vatTranslation}}]{{/i18n}}
                                 </label>
                             </div>

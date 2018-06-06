@@ -214,12 +214,17 @@
             } else {
                 $("#billingAddressCompany").removeAttr('required');
                 $("#vat-number-container").addClass(hiddenClasses);
+                $("#vatNr").val(null)
             }
         });
 
         if($("#add-company-billing-details:checked, #invoice-requested:checked").length === 1) {
             $("#selected-country-code").text($("#vatCountry").attr('value'))
             $("#add-company-billing-details:checked, #invoice-requested:checked").change();
+        }
+
+        if($("#vatNr").attr('value') != '') {
+            $("#add-company-billing-details, #invoice-requested").click();
         }
     });
 

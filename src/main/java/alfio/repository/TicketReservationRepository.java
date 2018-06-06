@@ -143,8 +143,8 @@ public interface TicketReservationRepository {
                           @Bind("invoiceRequested") boolean invoiceRequested,
                           @Bind("reservationId") String reservationId);
 
-    @Query("update tickets_reservation set  invoice_requested = false, vat_status = null, vat_nr = null, vat_country = null, billing_address = null where id = :reservationId")
-    int resetBillingData(@Bind("reservationId") String reservationId);
+    @Query("update tickets_reservation set  invoice_requested = false, vat_status = null where id = :reservationId")
+    int resetVat(@Bind("reservationId") String reservationId);
 
 
     @Query("select count(ticket.id) ticket_sold, to_char(trunc(confirmation_ts), 'yyyy-MM-dd') as day from ticket " +
