@@ -34,6 +34,39 @@
 
         displayMessage();
 
+        function submitForm(e) {
+            var $form = $(this);
+
+            if(!this.checkValidity()) {
+                return false;
+            }
+
+            //var vatCountry = $('#vatCountry');
+            // if(vatCountry.length && vatCountry.val() !== '') {
+            //     var vatNr = $('#vatNr');
+            //     markFieldAsError(vatNr);
+            //     $('#validation-result-container').removeClass(hiddenClasses);
+            //     var validationResult = $('#validation-result');
+            //     validationResult.html(validationResult.attr('data-validation-required-msg'));
+            //     vatNr.focus();
+            //     return false;
+            // }
+
+            // Disable the submit button to prevent repeated clicks
+            $form.find('button').prop('disabled', true);
+
+            var selectedPaymentMethod = $form.find('input[name=paymentMethod]');
+            if(hasStripe && (selectedPaymentMethod.length === 0 ||
+                (selectedPaymentMethod.length === 1 && selectedPaymentMethod.val() === 'STRIPE') ||
+                selectedPaymentMethod.filter(':checked').val() === 'STRIPE')) {
+                Stripe.card.createToken($form, stripeResponseHandler);
+                // Prevent the form from submitting with the default action
+                return false;
+            }
+            return true;
+        }
+        $('#payment-form').submit(submitForm);
+
 
         $("#cancel-reservation").click(function(e) {
             var $form = $('#payment-form');
@@ -45,7 +78,7 @@
                 .attr('novalidate', 'novalidate')
                 .unbind('submit', submitForm)
                 .find('button').prop('disabled', true);
-            $form.append($('<input type="hidden" name="cancelReservation" />').val(true))
+            $form.append($('<input type="hidden" name="backFromOverview" />').val(true))
             $form.submit();
         });
 

@@ -45,6 +45,7 @@ public class PaymentForm implements Serializable {
     private String customerReference;
     private String hmac;
     private Boolean cancelReservation;
+    private Boolean backFromOverview;
     private Boolean termAndConditionsAccepted;
     private Boolean privacyPolicyAccepted;
     private PaymentProxy paymentMethod;
@@ -153,6 +154,10 @@ public class PaymentForm implements Serializable {
 
     public Boolean shouldCancelReservation() {
         return Optional.ofNullable(cancelReservation).orElse(false);
+    }
+
+    public boolean isBackFromOverview() {
+        return Optional.ofNullable(backFromOverview).orElse(false);
     }
 
     public static PaymentForm fromExistingReservation(TicketReservation reservation) {

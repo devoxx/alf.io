@@ -459,6 +459,11 @@ public class ReservationController {
         if (!ticketReservation.isPresent()) {
             return Optional.of(redirectReservation(ticketReservation, eventName, reservationId));
         }
+
+        if(paymentForm.isBackFromOverview()) {
+            return Optional.of("redirect:/event/" + eventName + "/reservation/" + reservationId);
+        }
+
         if (paymentForm.shouldCancelReservation()) {
             ticketReservationManager.cancelPendingReservation(reservationId, false);
             SessionUtil.removeSpecialPriceData(request);
