@@ -109,7 +109,7 @@ public class ReservationApiController {
         return result;
     }
 
-    @PostMapping("/event/{eventName}/reservation/{reservationId}/reset-billing-info")
+    /*@PostMapping("/event/{eventName}/reservation/{reservationId}/reset-billing-info")
     @Transactional
     public ResponseEntity<Boolean> resetVat(@PathVariable("eventName") String eventName,
                                             @PathVariable("reservationId") String reservationId) {
@@ -174,7 +174,7 @@ public class ReservationApiController {
                 }
             })
             .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
-    }
+    }*/
 
     private boolean isEUCountry(String country) {
         return configurationManager.getRequiredValue(getSystemConfiguration(ConfigurationKeys.EU_COUNTRIES_LIST)).contains(country);
