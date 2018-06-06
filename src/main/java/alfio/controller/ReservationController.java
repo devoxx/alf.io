@@ -339,6 +339,7 @@ public class ReservationController {
 
         if(bindingResult.hasErrors()) {
             ticketReservationRepository.updateValidationStatus(reservationId, false);
+            SessionUtil.addToFlash(bindingResult, redirectAttributes);
             return "redirect:/event/" + eventName + "/reservation/" + reservationId + "/book";
         }
 
