@@ -80,18 +80,13 @@
                     {{#field-has-error}}[email]<span class="help-block text-danger">{{#i18n}}{{#field-error}}email{{/field-error}}{{/i18n}}</span>{{/field-has-error}}
                 </div>
             </div>
-            {{#captchaRequestedFreeOfCharge}}
-                <div class="col-xs-12 col-md-6">
-                    <div id="captcha-FREE" class="g-recaptcha" data-sitekey="{{recaptchaApiKey}}"></div>
-                </div>
-            {{/captchaRequestedFreeOfCharge}}
         </div>
 
         <div class="row">
             <div class="col-xs-12">
                 <div class="form-group">
                     <label for="billingAddressCompany">{{#i18n}}reservation-page-complete.company{{/i18n}}</label>
-                    <input id="billingAddressCompany" name="billingAddressCompany" class="form-control" type="text">
+                    <input id="billingAddressCompany" name="billingAddressCompany" class="form-control" type="text" value="{{paymentForm.billingAddressCompany}}">
                 </div>
             </div>
         </div>
@@ -99,7 +94,7 @@
             <div class="col-xs-12">
                 <div class="form-group">
                     <label for="billingAddressLine1">{{#i18n}}reservation-page.address-line-1{{/i18n}}</label>
-                    <input id="billingAddressLine1" name="billingAddressLine1" class="form-control" type="text" required>
+                    <input id="billingAddressLine1" name="billingAddressLine1" class="form-control" type="text" required value="{{paymentForm.billingAddressLine1}}">
                 </div>
             </div>
         </div>
@@ -107,7 +102,7 @@
             <div class="col-xs-12">
                 <div class="form-group">
                     <label for="billingAddressLine2">{{#i18n}}reservation-page.address-line-2{{/i18n}}</label>
-                    <input id="billingAddressLine2" name="billingAddressLine2" class="form-control" type="text">
+                    <input id="billingAddressLine2" name="billingAddressLine2" class="form-control" type="text" value="{{paymentForm.billingAddressLine2}}">
                 </div>
             </div>
         </div>
@@ -115,13 +110,13 @@
             <div class="col-xs-12 col-md-4">
                 <div class="form-group">
                     <label for="billingAddressZip">{{#i18n}}reservation-page.zip-postal-code{{/i18n}}</label>
-                    <input id="billingAddressZip" name="billingAddressZip" class="form-control" type="text" required>
+                    <input id="billingAddressZip" name="billingAddressZip" class="form-control" type="text" required value="{{paymentForm.billingAddressZip}}">
                 </div>
             </div>
             <div class="col-xs-12 col-md-8">
                     <div class="form-group">
                         <label for="billingAddressCity">{{#i18n}}reservation-page.city{{/i18n}}</label>
-                        <input id="billingAddressCity" name="billingAddressCity" class="form-control" type="text" required>
+                        <input id="billingAddressCity" name="billingAddressCity" class="form-control" type="text" required value="{{paymentForm.billingAddressCity}}">
                     </div>
             </div>
         </div>

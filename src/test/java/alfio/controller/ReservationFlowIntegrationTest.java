@@ -206,7 +206,7 @@ public class ReservationFlowIntegrationTest {
 
         //
         TemplateManager templateManager = Mockito.mock(TemplateManager.class);
-        reservationApiController = new ReservationApiController(eventRepository, ticketHelper, templateManager, i18nManager, euVatChecker, ticketReservationRepository, ticketReservationManager, configurationManager);
+        reservationApiController = new ReservationApiController(ticketHelper, templateManager, i18nManager);
     }
 
 

@@ -143,7 +143,7 @@ public class PaymentForm implements Serializable {
         return false;
     }
 
-    public static PaymentForm fromExistingReservation(TicketReservation reservation) {
+    public static PaymentForm fromExistingReservation(TicketReservation reservation, TicketReservationAdditionalInfo additionalInfo) {
         PaymentForm form = new PaymentForm();
         form.setFirstName(reservation.getFirstName());
         form.setLastName(reservation.getLastName());
@@ -154,6 +154,13 @@ public class PaymentForm implements Serializable {
         form.setVatNr(reservation.getVatNr());
         form.setInvoiceRequested(reservation.isInvoiceRequested());
         form.setCustomerReference(reservation.getCustomerReference());
+
+        form.setBillingAddressCompany(additionalInfo.getBillingAddressCompany());
+        form.setBillingAddressLine1(additionalInfo.getBillingAddressLine1());
+        form.setBillingAddressLine2(additionalInfo.getBillingAddressLine2());
+        form.setBillingAddressZip(additionalInfo.getBillingAddressZip());
+        form.setBillingAddressCity(additionalInfo.getBillingAddressCity());
+
         return form;
     }
 

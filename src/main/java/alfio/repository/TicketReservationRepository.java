@@ -179,7 +179,13 @@ public interface TicketReservationRepository {
 
     @Query("update tickets_reservation set full_name = :fullName, first_name = :firstName, last_name = :lastName, email_address = :email, " +
         " billing_address = :completeBillingAddress, vat_country = :vatCountry, vat_nr = :vatNr, " +
-        " invoice_requested = :invoiceRequested " +
+        " invoice_requested = :invoiceRequested, " +
+        " billing_address_company = :billingAddressCompany, " +
+        " billing_address_line1 = :billingAddressLine1, " +
+        " billing_address_line2 = :billingAddressLine2, " +
+        " billing_address_zip = :billingAddressZip, " +
+        " billing_address_city = :billingAddressCity, " +
+        " validated_for_overview = :validated " +
         " where id = :reservationId")
     int updateTicketReservationWithValidation(@Bind("reservationId") String reservationId,
                                               @Bind("fullName") String fullName,
@@ -196,4 +202,12 @@ public interface TicketReservationRepository {
                                               @Bind("vatNr") String vatNr,
                                               @Bind("invoiceRequested") boolean invoiceRequested,
                                               @Bind("validated") boolean validated);
+
+
+    @Query("select billing_address_company, billing_address_line1, billing_address_line2, " +
+        " billing_address_zip, billing_address_city, validated_for_overview from tickets_reservation where id = :id")
+    TicketReservationAdditionalInfo getAdditionalInfo(@Bind("id") String reservationId);
+
+    @Query("update tickets_reservation set validated_for_overview = :validated where id = :reservationId")
+    int updateValidationStatus(@Bind("reservationId") String reservationId, @Bind("validated") boolean validated);
 }
