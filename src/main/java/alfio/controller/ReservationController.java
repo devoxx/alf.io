@@ -298,7 +298,11 @@ public class ReservationController {
 
         Configuration.ConfigurationPathKey invoiceOnlyKey = Configuration.from(event.getOrganizationId(), event.getId(), ConfigurationKeys.GENERATE_ONLY_INVOICE);
         boolean invoiceOnly = configurationManager.getBooleanConfigValue(invoiceOnlyKey, false);
+
+        final boolean userInvoiceRequested = paymentForm.isInvoiceRequested();
+
         if(invoiceOnly && reservationCost.getPriceWithVAT() > 0) {
+            //override, that's why we save it
             paymentForm.setInvoiceRequested(true);
         }
         // this will be for validation purpose
@@ -319,42 +323,45 @@ public class ReservationController {
 
         assignTickets(event.getShortName(), reservationId, paymentForm, bindingResult, request, true);
 
+        if( isBusiness(userInvoiceRequested, paymentForm.getBillingAddressCompany())) {
+            // VAT handling
+            String country = paymentForm.getVatCountryCode();
+            Optional<Triple<Event, TicketReservation, VatDetail>> vatDetail = eventRepository.findOptionalByShortName(eventName)
+                .flatMap(e -> ticketReservationRepository.findOptionalReservationById(reservationId).map(r -> Pair.of(e, r)))
+                .filter(e -> EnumSet.of(INCLUDED, NOT_INCLUDED).contains(e.getKey().getVatStatus()))
+                .filter(e -> vatChecker.isVatCheckingEnabledFor(e.getKey().getOrganizationId()))
+                .flatMap(e -> vatChecker.checkVat(paymentForm.getVatNr(), country, e.getKey().getOrganizationId()).map(vd -> Triple.of(e.getLeft(), e.getRight(), vd)));
 
-        // VAT EU
-        // handle EU VAT
-        String country = paymentForm.getVatCountryCode();
-        Optional<Triple<Event, TicketReservation, VatDetail>> vatDetail = eventRepository.findOptionalByShortName(eventName)
-            .flatMap(e -> ticketReservationRepository.findOptionalReservationById(reservationId).map(r -> Pair.of(e, r)))
-            .filter(e -> EnumSet.of(INCLUDED, NOT_INCLUDED).contains(e.getKey().getVatStatus()))
-            .filter(e -> vatChecker.isVatCheckingEnabledFor(e.getKey().getOrganizationId()))
-            .flatMap(e -> vatChecker.checkVat(paymentForm.getVatNr(), country, e.getKey().getOrganizationId()).map(vd -> Triple.of(e.getLeft(), e.getRight(), vd)));
+            vatDetail.ifPresent(t-> {
+                VatDetail vatValidation = t.getRight();
+                if(!vatValidation.isValid()) {
+                    bindingResult.rejectValue("vatNr", "error.vat");
+                }
+            });
+
+            vatDetail
+                .filter(t -> t.getRight().isValid())
+                .ifPresent(t -> {
+                    VatDetail vd = t.getRight();
+                    PriceContainer.VatStatus vatStatus = determineVatStatus(t.getLeft().getVatStatus(), t.getRight().isVatExempt());
+                    ticketReservationRepository.updateBillingData(vatStatus, StringUtils.trimToNull(vd.getVatNr()), country, paymentForm.isInvoiceRequested(), reservationId);
+                    OrderSummary orderSummary = ticketReservationManager.orderSummaryForReservationId(reservationId, t.getLeft(), Locale.forLanguageTag(t.getMiddle().getUserLanguage()));
+                    ticketReservationRepository.addReservationInvoiceOrReceiptModel(reservationId, Json.toJson(orderSummary));
+                });
+        }
 
         //FIXME add VALIDATION, VAT CHECK and UPDATE
-
-        vatDetail.ifPresent(t-> {
-
-            VatDetail vatValidation = t.getRight();
-            if(!vatValidation.isValid()) {
-                bindingResult.rejectValue("vatNr", "error.vat");
-            }
-        });
 
         if(bindingResult.hasErrors()) {
             return "redirect:/event/" + eventName + "/reservation/" + reservationId + "/book";
         }
 
-        vatDetail
-            .filter(t -> t.getRight().isValid())
-            .ifPresent(t -> {
-                VatDetail vd = t.getRight();
-                PriceContainer.VatStatus vatStatus = determineVatStatus(t.getLeft().getVatStatus(), t.getRight().isVatExempt());
-                ticketReservationRepository.updateBillingData(vatStatus, StringUtils.trimToNull(vd.getVatNr()), country, paymentForm.isInvoiceRequested(), reservationId);
-                OrderSummary orderSummary = ticketReservationManager.orderSummaryForReservationId(reservationId, t.getLeft(), Locale.forLanguageTag(t.getMiddle().getUserLanguage()));
-                ticketReservationRepository.addReservationInvoiceOrReceiptModel(reservationId, Json.toJson(orderSummary));
-            });
-
         //FIXME implement validation
         return "redirect:/event/" + eventName + "/reservation/" + reservationId + "/overview";
+    }
+
+    private static boolean isBusiness(boolean userInvoiceRequested, String company) {
+        return userInvoiceRequested && StringUtils.isNotBlank(company);
     }
 
     @RequestMapping(value = "/event/{eventName}/reservation/{reservationId}/overview", method = RequestMethod.GET)
