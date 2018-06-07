@@ -320,29 +320,33 @@ public class ReservationController {
                 ValidationUtils.rejectIfEmptyOrWhitespace(bindingResult, "vatNr", "error.empty-vat");
             }
 
-            Optional<Triple<Event, TicketReservation, VatDetail>> vatDetail = eventRepository.findOptionalByShortName(eventName)
-                .flatMap(e -> ticketReservationRepository.findOptionalReservationById(reservationId).map(r -> Pair.of(e, r)))
-                .filter(e -> EnumSet.of(INCLUDED, NOT_INCLUDED).contains(e.getKey().getVatStatus()))
-                .filter(e -> vatChecker.isVatCheckingEnabledFor(e.getKey().getOrganizationId()))
-                .flatMap(e -> vatChecker.checkVat(paymentForm.getVatNr(), country, e.getKey().getOrganizationId()).map(vd -> Triple.of(e.getLeft(), e.getRight(), vd)));
+            try {
+                Optional<Triple<Event, TicketReservation, VatDetail>> vatDetail = eventRepository.findOptionalByShortName(eventName)
+                    .flatMap(e -> ticketReservationRepository.findOptionalReservationById(reservationId).map(r -> Pair.of(e, r)))
+                    .filter(e -> EnumSet.of(INCLUDED, NOT_INCLUDED).contains(e.getKey().getVatStatus()))
+                    .filter(e -> vatChecker.isVatCheckingEnabledFor(e.getKey().getOrganizationId()))
+                    .flatMap(e -> vatChecker.checkVat(paymentForm.getVatNr(), country, e.getKey().getOrganizationId()).map(vd -> Triple.of(e.getLeft(), e.getRight(), vd)));
 
 
-            vatDetail.ifPresent(t-> {
-                VatDetail vatValidation = t.getRight();
-                if(!vatValidation.isValid()) {
-                    bindingResult.rejectValue("vatNr", "error.vat");
-                }
-            });
-
-            vatDetail
-                .filter(t -> t.getRight().isValid())
-                .ifPresent(t -> {
-                    VatDetail vd = t.getRight();
-                    PriceContainer.VatStatus vatStatus = determineVatStatus(t.getLeft().getVatStatus(), t.getRight().isVatExempt());
-                    ticketReservationRepository.updateBillingData(vatStatus, StringUtils.trimToNull(vd.getVatNr()), country, paymentForm.isInvoiceRequested(), reservationId);
-                    OrderSummary orderSummary = ticketReservationManager.orderSummaryForReservationId(reservationId, t.getLeft(), Locale.forLanguageTag(t.getMiddle().getUserLanguage()));
-                    ticketReservationRepository.addReservationInvoiceOrReceiptModel(reservationId, Json.toJson(orderSummary));
+                vatDetail.ifPresent(t -> {
+                    VatDetail vatValidation = t.getRight();
+                    if (!vatValidation.isValid()) {
+                        bindingResult.rejectValue("vatNr", "error.vat");
+                    }
                 });
+
+                vatDetail
+                    .filter(t -> t.getRight().isValid())
+                    .ifPresent(t -> {
+                        VatDetail vd = t.getRight();
+                        PriceContainer.VatStatus vatStatus = determineVatStatus(t.getLeft().getVatStatus(), t.getRight().isVatExempt());
+                        ticketReservationRepository.updateBillingData(vatStatus, StringUtils.trimToNull(vd.getVatNr()), country, paymentForm.isInvoiceRequested(), reservationId);
+                        OrderSummary orderSummary = ticketReservationManager.orderSummaryForReservationId(reservationId, t.getLeft(), Locale.forLanguageTag(t.getMiddle().getUserLanguage()));
+                        ticketReservationRepository.addReservationInvoiceOrReceiptModel(reservationId, Json.toJson(orderSummary));
+                    });
+            } catch (IllegalStateException ise) {//vat checker failure
+                bindingResult.rejectValue("vatNr", "error.vatVIESDown");
+            }
         }
 
         //FIXME add VALIDATION, VAT CHECK and UPDATE
