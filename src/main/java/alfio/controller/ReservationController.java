@@ -294,7 +294,7 @@ public class ReservationController {
         // this will be for validation purpose
 
 
-        CustomerName customerName = new CustomerName(paymentForm.getFullName(), paymentForm.getFirstName(), paymentForm.getLastName(), event);
+        CustomerName customerName = new CustomerName(paymentForm.getFullName(), paymentForm.getFirstName(), paymentForm.getLastName(), event, false);
 
         //
         ticketReservationRepository.resetVat(reservationId);
