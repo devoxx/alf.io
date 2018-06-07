@@ -30,7 +30,7 @@
                             <td data-ng-class-even="'active'"><a data-ui-sref="events.single.view-reservation({eventName:eventName, reservationId: reservation.left.id})">{{reservation.left.invoiceNumber}}</a></td>
                             <td data-ng-class-even="'active'">{{reservation.left.creationTimestamp | formatDate}}</td>
                             <td data-ng-class-even="'active'">{{reservation.left.validity | formatDate}}</td>
-                            <td data-ng-class-even="'active'" style="text-align:right">{{reservation.right.totalPrice | currency:"€"}}</td>
+                            <td data-ng-class-even="'active'" class="text-right">{{reservation.right.totalPrice | currency:"€"}}</td>
                             <td data-ng-class-even="'active'">{{reservation.left.fullName}}</td>
                             <td data-ng-class-even="'active'">{{reservation.left.email}}</td>
                             <td data-ng-class-even="'active'"><button class="btn btn-success btn-xs" data-ng-disabled="loading" data-ng-click="registerPayment(eventName, reservation.left.id)"><i class="fa fa-check"></i> confirm</button> <button data-ng-disabled="loading" data-ng-click="deletePayment(eventName, reservation.left.id)" class="btn btn-danger btn-xs"><i class="fa fa-trash-o"></i> delete</button></td>
