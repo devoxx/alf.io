@@ -209,9 +209,12 @@
             }
         });
 
+        handleRequiredVatNR();
+
         $("#vatCountry").change(function() {
             var val = $(this).val();
             $("#selected-country-code").text(val);
+            handleRequiredVatNR();
         });
 
         $("#add-company-billing-details, #invoice-requested").change(function() {
@@ -219,12 +222,43 @@
             if($(this).is(':checked')) {
                 $("#billingAddressCompany").attr('required', true);
                 $("#vat-number-container").removeClass(hiddenClasses);
+
             } else {
                 $("#billingAddressCompany").removeAttr('required');
                 $("#vat-number-container").addClass(hiddenClasses);
-                $("#vatNr").val(null)
+                $("#vatNr").val(null);
             }
+            handleRequiredVatNR();
         });
+
+
+        function handleRequiredVatNR() {
+            var vatNrChecked = $("#add-company-billing-details:checked, #invoice-requested:checked").length === 1;
+
+            if(vatNrChecked) {
+                if(isEUVatCheckingEnabled() && isEUCountry($("#vatCountry").val())) {
+                    $("#vatNr").attr('required', true);
+                } else {
+                    $("#vatNr").parent().removeClass('has-error');
+                    $("#vatNr").removeAttr('required');
+                }
+            } else {
+                $("#vatNr").parent().removeClass('has-error');
+                $("#vatNr").removeAttr('required');
+            }
+        }
+
+        function isEUVatCheckingEnabled() {
+            return $("#payment-form[eu-vat-checking-enabled=true]").length === 1
+        }
+
+        function isEUCountry(country) {
+            if(country) {
+                return $("#optgroup-eu-countries-list option[value="+country+"]").length == 1
+            } else {
+                return false;
+            }
+        }
 
         if($("#add-company-billing-details:checked, #invoice-requested:checked").length === 1) {
             $("#selected-country-code").text($("#vatCountry").val())

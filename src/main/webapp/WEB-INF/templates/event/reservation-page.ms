@@ -38,7 +38,7 @@
     </span>
 </div>
 
-<form action="{{request.contextPath}}/event/{{event.shortName}}/reservation/{{reservation.id}}/validate-to-overview" method="POST" id="payment-form">
+<form action="{{request.contextPath}}/event/{{event.shortName}}/reservation/{{reservation.id}}/validate-to-overview" method="POST" id="payment-form" {{#euVatCheckingEnabled}}eu-vat-checking-enabled="true"{{/euVatCheckingEnabled}}>
 
     {{^paypalCheckoutConfirmation}}
 
@@ -107,13 +107,13 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-xs-12 col-md-4">
+            <div class="col-xs-12 col-md-3">
                 <div class="form-group">
                     <label for="billingAddressZip">{{#i18n}}reservation-page.zip-postal-code{{/i18n}}</label>
                     <input id="billingAddressZip" name="billingAddressZip" class="form-control" type="text" required value="{{paymentForm.billingAddressZip}}">
                 </div>
             </div>
-            <div class="col-xs-12 col-md-8">
+            <div class="col-xs-12 col-md-9">
                     <div class="form-group">
                         <label for="billingAddressCity">{{#i18n}}reservation-page.city{{/i18n}}</label>
                         <input id="billingAddressCity" name="billingAddressCity" class="form-control" type="text" required value="{{paymentForm.billingAddressCity}}">
