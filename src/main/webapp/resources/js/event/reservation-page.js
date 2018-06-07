@@ -232,7 +232,7 @@
         }
 
         if($("#vatNr").attr('value') != '') {
-            $("#add-company-billing-details, #invoice-requested").click();
+            $("#add-company-billing-details").click();
         }
     });
 

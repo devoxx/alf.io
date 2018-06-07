@@ -156,14 +156,12 @@
                 <div class="col-xs-12">
                     {{#onlyInvoice}}
                         <input type="hidden" name="invoiceRequested" id="invoice-requested" value="true">
-                        {{#euVatCheckingEnabled}}
-                            <div class="checkbox wMarginTop">
-                                <label>
-                                    <input type="checkbox" name="addCompanyBillingDetails" id="add-company-billing-details" value="true">
-                                    {{#i18n}}reservation.add-company-billing-details [{{vatTranslation}}]{{/i18n}}
-                                </label>
-                            </div>
-                        {{/euVatCheckingEnabled}}
+                        <div class="checkbox wMarginTop">
+                            <label>
+                                <input type="checkbox" name="addCompanyBillingDetails" id="add-company-billing-details" value="true">
+                                {{#i18n}}reservation.add-company-billing-details [{{vatTranslation}}]{{/i18n}}
+                            </label>
+                        </div>
                     {{/onlyInvoice}}
                     {{^onlyInvoice}}
                         <div class="checkbox wMarginTop">

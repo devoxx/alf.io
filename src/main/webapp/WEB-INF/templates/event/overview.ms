@@ -140,7 +140,7 @@
     {{#orderSummary.free}}
         <div class="row">
             <div class="col-md-4 col-md-push-8 col-xs-12 wMarginBottom"><button type="submit" class="btn btn-success btn-block" id="continue-button">{{#i18n}}reservation-page.continue{{/i18n}}</button></div>
-            <div class="col-md-4 col-md-pull-4 col-xs-12"><button type="submit" class="btn btn-default btn-block" id="cancel-reservation">{{#i18n}}reservation-page.cancel{{/i18n}}</button></div>
+            <div class="col-md-4 col-md-pull-4 col-xs-12"><button type="submit" class="btn btn-default btn-block" id="cancel-reservation">{{#i18n}}common.back{{/i18n}}</button></div>
         </div>
     {{/orderSummary.free}}
     {{^orderSummary.free}}
@@ -155,7 +155,7 @@
                 {{/paypalCheckoutConfirmation}}
                 </button>
             </div>
-            <div class="col-md-4 col-md-pull-4 col-xs-12"><button type="submit" class="btn btn-default btn-block" id="cancel-reservation">{{#i18n}}reservation-page.cancel{{/i18n}}</button></div>
+            <div class="col-md-4 col-md-pull-4 col-xs-12"><button type="submit" class="btn btn-default btn-block" id="cancel-reservation">{{#i18n}}common.back{{/i18n}}</button></div>
         </div>
     {{/orderSummary.free}}
     <input type="hidden" name="{{_csrf.parameterName}}" value="{{_csrf.token}}">
