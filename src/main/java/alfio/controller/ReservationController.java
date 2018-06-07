@@ -349,7 +349,7 @@ public class ReservationController {
             }
         }
 
-        //FIXME add VALIDATION, VAT CHECK and UPDATE
+        //
 
         paymentForm.validate(bindingResult, event, ticketFieldRepository.findAdditionalFieldsForEvent(event.getId()));
 
@@ -359,7 +359,7 @@ public class ReservationController {
             return "redirect:/event/" + eventName + "/reservation/" + reservationId + "/book";
         }
 
-        //FIXME implement validation
+        //
         return "redirect:/event/" + eventName + "/reservation/" + reservationId + "/overview";
     }
 

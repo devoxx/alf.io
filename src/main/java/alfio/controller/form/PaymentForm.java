@@ -117,9 +117,18 @@ public class PaymentForm implements Serializable {
         if(invoiceRequested) {
             //ValidationUtils.rejectIfEmptyOrWhitespace(bindingResult, "billingAddress", ErrorsCode.STEP_2_EMPTY_BILLING_ADDRESS);
             ValidationUtils.rejectIfEmptyOrWhitespace(bindingResult, "billingAddressCompany", "error.emptyField");
+            rejectIfOverLength(bindingResult, "billingAddressCompany", "error.tooLong", billingAddressCompany, 256);
+
             ValidationUtils.rejectIfEmptyOrWhitespace(bindingResult, "billingAddressLine1", "error.emptyField");
+            rejectIfOverLength(bindingResult, "billingAddressLine1", "error.tooLong", billingAddressLine1, 256);
+
+            rejectIfOverLength(bindingResult, "billingAddressLine2", "error.tooLong", billingAddressLine2, 256);
+
             ValidationUtils.rejectIfEmptyOrWhitespace(bindingResult, "billingAddressZip", "error.emptyField");
+            rejectIfOverLength(bindingResult, "billingAddressZip", "error.tooLong", billingAddressZip, 51);
+
             ValidationUtils.rejectIfEmptyOrWhitespace(bindingResult, "billingAddressCity", "error.emptyField");
+            rejectIfOverLength(bindingResult, "billingAddressCity", "error.tooLong", billingAddressCity, 256);
         }
 
         if (email != null && !email.contains("@") && !bindingResult.hasFieldErrors("email")) {
