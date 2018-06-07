@@ -230,10 +230,6 @@
             $("#selected-country-code").text($("#vatCountry").val())
             $("#add-company-billing-details:checked, #invoice-requested:checked").change();
         }
-
-        if($("#vatNr").attr('value') != '') {
-            $("#add-company-billing-details").click();
-        }
     });
 
 })();

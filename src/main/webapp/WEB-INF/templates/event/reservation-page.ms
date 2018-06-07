@@ -158,7 +158,7 @@
                         <input type="hidden" name="invoiceRequested" id="invoice-requested" value="true">
                         <div class="checkbox wMarginTop">
                             <label>
-                                <input type="checkbox" name="addCompanyBillingDetails" id="add-company-billing-details" value="true">
+                                <input type="checkbox" name="addCompanyBillingDetails" id="add-company-billing-details" value="true" {{#paymentForm.addCompanyBillingDetails}}checked{{/paymentForm.addCompanyBillingDetails}}>
                                 {{#i18n}}reservation.add-company-billing-details [{{vatTranslation}}]{{/i18n}}
                             </label>
                         </div>

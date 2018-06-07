@@ -59,6 +59,7 @@ public class PaymentForm implements Serializable {
     private String billingAddressLine2;
     private String billingAddressZip;
     private String billingAddressCity;
+    private boolean addCompanyBillingDetails = false;
 
     private static void rejectIfOverLength(BindingResult bindingResult, String field, String errorCode,
             String value, int maxLength) {
@@ -160,6 +161,7 @@ public class PaymentForm implements Serializable {
         form.setBillingAddressLine2(additionalInfo.getBillingAddressLine2());
         form.setBillingAddressZip(additionalInfo.getBillingAddressZip());
         form.setBillingAddressCity(additionalInfo.getBillingAddressCity());
+        form.setAddCompanyBillingDetails(additionalInfo.hasAddCompanyBillingDetails());
 
         return form;
     }

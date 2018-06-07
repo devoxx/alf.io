@@ -1425,6 +1425,7 @@ public class TicketReservationManager {
                                   String billingAddressZip, String billingAddressCity, String vatCountryCode,
                                   String vatNr,
                                   boolean isInvoiceRequested,
+                                  boolean addCompanyBillingDetails,
                                   boolean validated) {
 
         String completeBillingAddress = StringUtils.trimToEmpty(billingAddressCompany)+"\n"+
@@ -1437,6 +1438,6 @@ public class TicketReservationManager {
         ticketReservationRepository.updateTicketReservationWithValidation(reservationId,
             customerName.getFullName(), customerName.getFirstName(), customerName.getLastName(),
             email, billingAddressCompany, billingAddressLine1, billingAddressLine2, billingAddressZip,
-            billingAddressCity, completeBillingAddress, vatCountryCode, vatNr, isInvoiceRequested, validated);
+            billingAddressCity, completeBillingAddress, vatCountryCode, vatNr, isInvoiceRequested, addCompanyBillingDetails, validated);
     }
 }

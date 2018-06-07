@@ -30,23 +30,30 @@ public class TicketReservationAdditionalInfo {
     private final String billingAddressZip;
     private final String billingAddressCity;
     private final Boolean validated;
+    private final Boolean addCompanyBillingDetails;
 
     public TicketReservationAdditionalInfo(@Column("billing_address_company") String billingAddressCompany,
                                            @Column("billing_address_line1") String billingAddressLine1,
                                            @Column("billing_address_line2") String billingAddressLine2,
                                            @Column("billing_address_zip") String billingAddressZip,
                                            @Column("billing_address_city") String billingAddressCity,
-                                           @Column("validated_for_overview") Boolean validated) {
+                                           @Column("validated_for_overview") Boolean validated,
+                                           @Column("add_company_billing_details") Boolean addCompanyBillingDetails) {
         this.billingAddressCompany = billingAddressCompany;
         this.billingAddressLine1 = billingAddressLine1;
         this.billingAddressLine2 = billingAddressLine2;
         this.billingAddressZip = billingAddressZip;
         this.billingAddressCity = billingAddressCity;
         this.validated = validated;
+        this.addCompanyBillingDetails = addCompanyBillingDetails;
     }
 
 
     public boolean hasBeenValidated() {
         return Optional.ofNullable(validated).orElse(false);
+    }
+
+    public boolean hasAddCompanyBillingDetails() {
+        return Optional.ofNullable(addCompanyBillingDetails).orElse(false);
     }
 }

@@ -21,3 +21,4 @@ alter table tickets_reservation add column billing_address_line2 varchar(512);
 alter table tickets_reservation add column billing_address_zip varchar(512);
 alter table tickets_reservation add column billing_address_city varchar(512);
 alter table tickets_reservation add column validated_for_overview boolean;
+alter table tickets_reservation add column add_company_billing_details boolean;

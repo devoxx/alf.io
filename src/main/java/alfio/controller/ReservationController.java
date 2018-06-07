@@ -51,6 +51,7 @@ import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.ValidationUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -284,7 +285,7 @@ public class ReservationController {
         Configuration.ConfigurationPathKey invoiceOnlyKey = Configuration.from(event.getOrganizationId(), event.getId(), ConfigurationKeys.GENERATE_ONLY_INVOICE);
         boolean invoiceOnly = configurationManager.getBooleanConfigValue(invoiceOnlyKey, false);
 
-        final boolean userInvoiceRequested = paymentForm.isInvoiceRequested();
+        final boolean companyVatChecked = invoiceOnly ? paymentForm.isAddCompanyBillingDetails() : paymentForm.isInvoiceRequested();
 
         if(invoiceOnly && reservationCost.getPriceWithVAT() > 0) {
             //override, that's why we save it
@@ -302,20 +303,29 @@ public class ReservationController {
         ticketReservationManager.updateReservation(reservationId, customerName, paymentForm.getEmail(),
             paymentForm.getBillingAddressCompany(), paymentForm.getBillingAddressLine1(), paymentForm.getBillingAddressLine2(),
             paymentForm.getBillingAddressZip(), paymentForm.getBillingAddressCity(), paymentForm.getVatCountryCode(),
-            paymentForm.getVatNr(), paymentForm.isInvoiceRequested(), true);
+            paymentForm.getVatNr(), paymentForm.isInvoiceRequested(), paymentForm.isAddCompanyBillingDetails(), true);
 
         ticketReservationRepository.addReservationInvoiceOrReceiptModel(reservationId, Json.toJson(ticketReservationManager.orderSummaryForReservationId(reservationId, event, locale)));
 
         assignTickets(event.getShortName(), reservationId, paymentForm, bindingResult, request, true);
 
-        if( isBusiness(userInvoiceRequested, paymentForm.getBillingAddressCompany())) {
+
+        if(isBusiness(companyVatChecked, paymentForm.getBillingAddressCompany())) {
+
             // VAT handling
             String country = paymentForm.getVatCountryCode();
+
+            // validate VAT presence if EU mode is enabled
+            if(vatChecker.isVatCheckingEnabledFor(event.getOrganizationId()) && isEUCountry(country)) {
+                ValidationUtils.rejectIfEmptyOrWhitespace(bindingResult, "vatNr", "error.empty-vat");
+            }
+
             Optional<Triple<Event, TicketReservation, VatDetail>> vatDetail = eventRepository.findOptionalByShortName(eventName)
                 .flatMap(e -> ticketReservationRepository.findOptionalReservationById(reservationId).map(r -> Pair.of(e, r)))
                 .filter(e -> EnumSet.of(INCLUDED, NOT_INCLUDED).contains(e.getKey().getVatStatus()))
                 .filter(e -> vatChecker.isVatCheckingEnabledFor(e.getKey().getOrganizationId()))
                 .flatMap(e -> vatChecker.checkVat(paymentForm.getVatNr(), country, e.getKey().getOrganizationId()).map(vd -> Triple.of(e.getLeft(), e.getRight(), vd)));
+
 
             vatDetail.ifPresent(t-> {
                 VatDetail vatValidation = t.getRight();
@@ -347,8 +357,12 @@ public class ReservationController {
         return "redirect:/event/" + eventName + "/reservation/" + reservationId + "/overview";
     }
 
-    private static boolean isBusiness(boolean userInvoiceRequested, String company) {
-        return userInvoiceRequested && StringUtils.isNotBlank(company);
+    private boolean isEUCountry(String countryCode) {
+        return configurationManager.getRequiredValue(getSystemConfiguration(ConfigurationKeys.EU_COUNTRIES_LIST)).contains(countryCode);
+    }
+
+    private static boolean isBusiness(boolean companyVatChecked, String company) {
+        return companyVatChecked && StringUtils.isNotBlank(company);
     }
 
     @RequestMapping(value = "/event/{eventName}/reservation/{reservationId}/overview", method = RequestMethod.GET)
