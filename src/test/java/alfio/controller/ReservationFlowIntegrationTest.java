@@ -28,6 +28,7 @@ import alfio.controller.api.admin.SerializablePair;
 import alfio.controller.api.admin.UsersApiController;
 import alfio.controller.api.support.TicketHelper;
 import alfio.controller.form.PaymentForm;
+import alfio.controller.form.PaymentOverviewForm;
 import alfio.controller.form.ReservationForm;
 import alfio.controller.form.UpdateTicketOwnerForm;
 import alfio.controller.support.TicketDecorator;
@@ -35,6 +36,7 @@ import alfio.manager.*;
 import alfio.manager.i18n.I18nManager;
 import alfio.manager.support.CheckInStatus;
 import alfio.manager.support.TicketAndCheckInResult;
+import alfio.manager.system.ConfigurationManager;
 import alfio.manager.user.UserManager;
 import alfio.model.*;
 import alfio.model.audit.ScanAudit;
@@ -172,6 +174,9 @@ public class ReservationFlowIntegrationTest {
     @Autowired
     private UsersApiController usersApiController;
 
+    @Autowired
+    private ConfigurationManager configurationManager;
+
     private ReservationApiController reservationApiController;
 
 
@@ -201,7 +206,7 @@ public class ReservationFlowIntegrationTest {
 
         //
         TemplateManager templateManager = Mockito.mock(TemplateManager.class);
-        reservationApiController = new ReservationApiController(eventRepository, ticketHelper, templateManager, i18nManager, euVatChecker, ticketReservationRepository, ticketReservationManager);
+        reservationApiController = new ReservationApiController(ticketHelper, templateManager, i18nManager);
     }
 
 
@@ -504,19 +509,26 @@ public class ReservationFlowIntegrationTest {
 
     private String payOffline(String eventName, String reservationIdentifier) {
         PaymentForm paymentForm = new PaymentForm();
-        paymentForm.setPaymentMethod(PaymentProxy.OFFLINE);
+
         paymentForm.setEmail("test@test.com");
         paymentForm.setBillingAddress("my billing address");
         paymentForm.setFirstName("full");
         paymentForm.setLastName("name");
-        paymentForm.setTermAndConditionsAccepted(true);
-        paymentForm.setPrivacyPolicyAccepted(true);
+
+
         paymentForm.setPostponeAssignment(true);
         BindingResult bindingResult = new BeanPropertyBindingResult(paymentForm, "paymentForm");
         Model model = new BindingAwareModelMap();
         MockHttpServletRequest request = new MockHttpServletRequest();
         RedirectAttributes redirectAttributes = new RedirectAttributesModelMap();
-        return reservationController.handleReservation(eventName, reservationIdentifier, paymentForm, bindingResult, model, request, Locale.ENGLISH, redirectAttributes);
+        reservationController.validateToOverview(eventName, reservationIdentifier, paymentForm, bindingResult, new BindingAwareModelMap(), request, Locale.ENGLISH, redirectAttributes);
+
+        PaymentOverviewForm  paymentOverviewForm = new PaymentOverviewForm();
+        paymentOverviewForm.setPaymentMethod(PaymentProxy.OFFLINE);
+        paymentOverviewForm.setTermAndConditionsAccepted(true);
+        paymentOverviewForm.setPrivacyPolicyAccepted(true);
+
+        return reservationController.handleReservation(eventName, reservationIdentifier, paymentOverviewForm, bindingResult, model, request, Locale.ENGLISH, redirectAttributes);
     }
 
     private String reserveTicket(String eventName) {

@@ -92,7 +92,7 @@ import static org.apache.commons.lang3.time.DateUtils.truncate;
 @Transactional
 @Log4j2
 public class TicketReservationManager {
-    
+
     private static final String STUCK_TICKETS_MSG = "there are stuck tickets for the event %s. Please check admin area.";
     private static final String STUCK_TICKETS_SUBJECT = "warning: stuck tickets found";
     static final String NOT_YET_PAID_TRANSACTION_ID = "not-paid";
@@ -188,7 +188,7 @@ public class TicketReservationManager {
         this.extensionManager = extensionManager;
         this.ticketSearchRepository = ticketSearchRepository;
     }
-    
+
     /**
      * Create a ticket reservation. It will create a reservation _only_ if it can find enough tickets. Note that it will not do date/validity validation. This must be ensured by the
      * caller.
@@ -208,9 +208,9 @@ public class TicketReservationManager {
                                           Locale locale,
                                           boolean forWaitingQueue) throws NotEnoughTicketsException, MissingSpecialPriceTokenException, InvalidSpecialPriceTokenException {
         String reservationId = UUID.randomUUID().toString();
-        
+
         Optional<PromoCodeDiscount> discount = promotionCodeDiscount.flatMap((promoCodeDiscount) -> promoCodeDiscountRepository.findPromoCodeInEventOrOrganization(event.getId(), promoCodeDiscount));
-        
+
         ticketReservationRepository.createNewReservation(reservationId, ZonedDateTime.now(event.getZoneId()), reservationExpiration, discount.map(PromoCodeDiscount::getId).orElse(null), locale.getLanguage(), event.getId(), event.getVat(), event.isVatIncluded());
         list.forEach(t -> reserveTicketsForCategory(event, specialPriceSessionId, reservationId, t, locale, forWaitingQueue, discount.orElse(null)));
 
@@ -618,23 +618,23 @@ public class TicketReservationManager {
         int updatedReservation = ticketReservationRepository.updateReservationStatus(reservationId, TicketReservationStatus.PENDING.toString());
         Validate.isTrue(updatedReservation == 1, "expected exactly one updated reservation, got "+updatedReservation);
     }
-    
+
     //check internal consistency between the 3 values
     public Optional<Triple<Event, TicketReservation, Ticket>> from(String eventName, String reservationId, String ticketIdentifier) {
-        return optionally(() -> Triple.of(eventRepository.findByShortName(eventName), 
-                ticketReservationRepository.findReservationById(reservationId), 
+        return optionally(() -> Triple.of(eventRepository.findByShortName(eventName),
+                ticketReservationRepository.findReservationById(reservationId),
                 ticketRepository.findByUUID(ticketIdentifier))).flatMap((x) -> {
-                    
+
                     Ticket t = x.getRight();
                     Event e = x.getLeft();
                     TicketReservation tr = x.getMiddle();
-                    
+
                     if(tr.getId().equals(t.getTicketsReservationId()) && e.getId() == t.getEventId()) {
                         return Optional.of(x);
                     } else {
                         return Optional.empty();
                     }
-                    
+
                 });
     }
 
@@ -724,7 +724,7 @@ public class TicketReservationManager {
         if(expiredReservationIds.isEmpty()) {
             return;
         }
-        
+
         specialPriceRepository.resetToFreeAndCleanupForReservation(expiredReservationIds);
         ticketRepository.resetCategoryIdForUnboundedCategories(expiredReservationIds);
         ticketFieldRepository.deleteAllValuesForReservations(expiredReservationIds);
@@ -821,15 +821,15 @@ public class TicketReservationManager {
 
     /**
      * Get the total cost with VAT if it's not included in the ticket price.
-     * 
+     *
      * @param reservationId
      * @return
      */
     public TotalPrice totalReservationCostWithVAT(String reservationId) {
         TicketReservation reservation = ticketReservationRepository.findReservationById(reservationId);
-        
+
         Optional<PromoCodeDiscount> promoCodeDiscount = Optional.ofNullable(reservation.getPromoCodeDiscountId()).map(promoCodeDiscountRepository::findById);
-        
+
         Event event = eventRepository.findByReservationId(reservationId);
         List<Ticket> tickets = ticketRepository.findTicketsInReservation(reservationId);
 
@@ -876,7 +876,7 @@ public class TicketReservationManager {
                 reservation.getStatus() == TicketReservationStatus.OFFLINE_PAYMENT,
                 reservation.getPaymentMethod() == PaymentProxy.ON_SITE, vat, reservation.getVatStatus(), refundedAmount);
     }
-    
+
     List<SummaryRow> extractSummary(String reservationId, PriceContainer.VatStatus reservationVatStatus,
                                     Event event, Locale locale, PromoCodeDiscount promoCodeDiscount, TotalPrice reservationCost) {
         List<SummaryRow> summary = new ArrayList<>();
@@ -953,7 +953,7 @@ public class TicketReservationManager {
     public int maxAmountOfTicketsForCategory(int organizationId, int eventId, int ticketCategoryId) {
         return configurationManager.getIntConfigValue(Configuration.from(organizationId, eventId, ticketCategoryId, ConfigurationKeys.MAX_AMOUNT_OF_TICKETS_BY_RESERVATION), 5);
     }
-    
+
     public Optional<TicketReservation> findById(String reservationId) {
         return ticketReservationRepository.findOptionalReservationById(reservationId);
     }
@@ -1418,5 +1418,26 @@ public class TicketReservationManager {
                 log.debug("reverted {} tickets for categories {}", count, restrictedCategories);
             }
         }
+    }
+
+    public void updateReservation(String reservationId, CustomerName customerName, String email,
+                                  String billingAddressCompany, String billingAddressLine1, String billingAddressLine2,
+                                  String billingAddressZip, String billingAddressCity, String vatCountryCode,
+                                  String vatNr,
+                                  boolean isInvoiceRequested,
+                                  boolean addCompanyBillingDetails,
+                                  boolean validated) {
+
+        String completeBillingAddress = StringUtils.trimToEmpty(billingAddressCompany)+"\n"+
+            StringUtils.trimToEmpty(billingAddressLine1)+"\n"+
+            StringUtils.trimToEmpty(billingAddressLine2)+"\n"+
+            StringUtils.trimToEmpty(StringUtils.trimToEmpty(billingAddressZip)+" "+StringUtils.trimToEmpty(billingAddressCity));
+
+        completeBillingAddress = completeBillingAddress.replace("\n\n", "\n");
+
+        ticketReservationRepository.updateTicketReservationWithValidation(reservationId,
+            customerName.getFullName(), customerName.getFirstName(), customerName.getLastName(),
+            email, billingAddressCompany, billingAddressLine1, billingAddressLine2, billingAddressZip,
+            billingAddressCity, completeBillingAddress, vatCountryCode, vatNr, isInvoiceRequested, addCompanyBillingDetails, validated);
     }
 }

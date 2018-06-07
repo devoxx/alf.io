@@ -3,70 +3,7 @@
     'use strict';
     
     
-    function stripeResponseHandler(status, response) {
-        var $form = $('#payment-form');
-     
-        
-        //https://stripe.com/docs/api#errors codes from stripes
-        
-        /*
-         * incorrect_number         The card number is incorrect.
-         * invalid_number           The card number is not a valid credit card number.
-         * invalid_expiry_month     The card's expiration month is invalid.
-         * invalid_expiry_year      The card's expiration year is invalid.
-         * invalid_cvc              The card's security code is invalid.
-         * expired_card             The card has expired.
-         * incorrect_cvc            The card's security code is incorrect.
-         * incorrect_zip            The card's zip code failed validation.
-         * card_declined            The card was declined.
-         * missing                  There is no card on a customer that is being charged.
-         * processing_error         An error occurred while processing the card.
-         * rate_limit               An error occurred due to requests hitting the API too quickly.
-         * 
-         */
-        
-        var errorCodeToSelectorMap = {
-            incorrect_number : '[data-stripe=number]',
-            invalid_number: '[data-stripe=number]',
-            invalid_expiry_month : '[data-stripe=exp-month]',
-            invalid_expiry_year : '[data-stripe=exp-year]',
-            invalid_cvc : '[data-stripe=cvc]',
-            expired_card : '[data-stripe]',
-            incorrect_cvc : '[data-stripe=cvc]',
-            card_declined : '[data-stripe]',
-            missing : '[data-stripe]',
-            processing_error : '[data-stripe]',
-            rate_limit : '[data-stripe]'
-        };
-        
-        if (response.error) {
-            $(".payment-errors").removeClass('hide').empty();
-            $("[data-stripe]").parent().removeClass('has-error');
-            
-            
-            var attrValue = document.getElementById("stripe-key").getAttribute('data-stripe-message-'+response.error.code);
-            
-            $form.find('.payment-errors').append("<p><strong>"+(attrValue || response.error.message)+"</strong></p>");
-            $form.find('button').prop('disabled', false);
-            $form.find(errorCodeToSelectorMap[response.error.code]).parent().addClass('has-error');
-            
-        } else {
-            $(".payment-errors").addClass('hide');
-            // token contains id, last4, and card type
-            var token = response.id;
-            // Insert the token into the form so it gets submitted to the server
-            $form.append($('<input type="hidden" name="stripeToken" />').val(token));
-            // and re-submit
-            $form.get(0).submit();
-        }
-    }
-    
-    var hasStripe = document.getElementById("stripe-key") != null;
-    
-    if(hasStripe) {
-        // This identifies your website in the createToken call below
-        Stripe.setPublishableKey(document.getElementById("stripe-key").getAttribute('data-stripe-key'));
-    }
+
     
     
      
@@ -132,15 +69,6 @@
              
             // Disable the submit button to prevent repeated clicks
             $form.find('button').prop('disabled', true);
-
-            var selectedPaymentMethod = $form.find('input[name=paymentMethod]');
-            if(hasStripe && (selectedPaymentMethod.length === 0 ||
-                (selectedPaymentMethod.length === 1 && selectedPaymentMethod.val() === 'STRIPE') ||
-                selectedPaymentMethod.filter(':checked').val() === 'STRIPE')) {
-                Stripe.card.createToken($form, stripeResponseHandler);
-                // Prevent the form from submitting with the default action
-                return false;
-            }
             return true;
         }
         
@@ -170,7 +98,7 @@
             }
         }
 
-        
+
         // based on http://tjvantoll.com/2012/08/05/html5-form-validation-showing-all-error-messages/
         // http://stackoverflow.com/questions/13798313/set-custom-html5-required-field-validation-message
         var createAllErrors = function() {
@@ -201,7 +129,7 @@
                 }
             });
         };
-        
+
         $("form").each(createAllErrors);
         $("input,select,textarea").change(function() {
             if( !this.validity.valid) {
@@ -217,31 +145,7 @@
             }
         });
 
-        var paymentMethod = $('input[name=paymentMethod]');
-        if(paymentMethod.length > 1) {
-            $('#payment-method-STRIPE').find('input').removeAttr('required');
-            $('.payment-method-detail').hide();
 
-            paymentMethod.change(function() {
-                var method = $(this).attr('data-payment-method');
-                $('.payment-method-detail').hide();
-                $('#payment-method-'+method).show();
-                if(method === 'STRIPE') {
-                    var inputFields = $('#payment-method-STRIPE').find('input');
-                    inputFields.attr('required', true);
-                    var fullName = $.trim($.trim($('#first-name').val()) + ' ' + $.trim($('#last-name').val()));
-                    if(fullName === '') {
-                        fullName = $.trim($('#full-name').val());
-                    }
-                    $('#card-name').val(fullName);
-                    inputFields.first().focus();
-
-                } else {
-                    $('#payment-method-STRIPE').find('input').val('').removeAttr('required');
-                    methodSelected(method);
-                }
-            });
-        }
 
         $('#first-name.autocomplete-src, #last-name.autocomplete-src').change(function() {
             fillAttendeeData($('#first-name').val(), $('#last-name').val());
@@ -298,201 +202,68 @@
             }
         }
 
+        $("select").map(function() {
+            var value = $(this).attr('value');
+            if(value && value.length > 0) {
+                $(this).val(value);
+            }
+        });
 
-        function disableBillingFields() {
-            $('#vatNr').attr('required', false).attr('disabled', '');
-        }
+        handleRequiredVatNR();
 
-        disableBillingFields();
+        $("#vatCountry").change(function() {
+            var val = $(this).val();
+            $("#selected-country-code").text(val);
+            handleRequiredVatNR();
+        });
 
-
-        $('#invoice-requested').change(function() {
-            var element = $('#invoice');
+        $("#add-company-billing-details, #invoice-requested").change(function() {
+            $("#selected-country-code").text($("#vatCountry").val())
             if($(this).is(':checked')) {
-                element.find('.field-required').attr('required', true);
-                element.removeClass('hidden');
-                var country = euBillingCountry.val() || '';
-                var isCountrySelected = country !== '';
-                if(isCountrySelected && $("#optgroup-eu-countries-list option[value="+country+"]").length === 1) {
-                    //EU country selected
-                    euBillingCountry.change();
-                } else if(isCountrySelected) {
-                    //non-EU, we must trigger validation
-                    console.log("TODO: trigger validation for ", country);
-                }
+                $("#billingAddressCompany").attr('required', true);
+                $("#vat-number-container").removeClass(hiddenClasses);
+
             } else {
-                element.find('.field-required').attr('required', false);
-                $('#billing-address').attr('required', false).attr('disabled');
-                element.addClass('hidden');
-                disableBillingFields();
+                $("#billingAddressCompany").removeAttr('required');
+                $("#vat-number-container").addClass(hiddenClasses);
+                $("#vatNr").val(null);
             }
+            handleRequiredVatNR();
         });
 
-        var euBillingCountry = $('#vatCountry');
-        euBillingCountry.change(function(event) {
-            if($(this).attr('lastKnown') === $(this).val()) {
-                return;
-            }
-            if($(this).val() === '') {
-                $('#billing-address').attr('required', true).removeAttr('disabled');
-                $('#validation-result-container, #vat-number-container, #validateVAT').addClass(hiddenClasses);
-                $('#vatNr').attr('required', false).attr('disabled', '');
-                $("#vatCountryCode").attr('required', false).attr('disabled', '');
-            } else {
-                var countryCode = $(this).val();
-                $(this).attr('lastKnown',countryCode);
-                var validateVATButton = $("#validateVAT");
-                if($("#optgroup-eu-countries-list option[value="+countryCode+"]").length === 1) {
-                    validateVATButton.text(validateVATButton.attr('data-text'));
-                } else if($("#add-company-billing-details").is(":checked")) {
-                    validateVATButton.text(validateVATButton.attr('data-text-non-eu'));
+
+        function handleRequiredVatNR() {
+            var vatNrChecked = $("#add-company-billing-details:checked, #invoice-requested:checked").length === 1;
+
+            if(vatNrChecked) {
+                if(isEUVatCheckingEnabled() && isEUCountry($("#vatCountry").val())) {
+                    $("#vatNr").attr('required', true);
+                } else {
+                    $("#vatNr").parent().removeClass('has-error');
+                    $("#vatNr").removeAttr('required');
                 }
+            } else {
+                $("#vatNr").parent().removeClass('has-error');
+                $("#vatNr").removeAttr('required');
             }
-            $("#add-company-billing-details").change();
-            $('#selected-country-code').text($(this).val());
-            $('#selected-country').text($(this).find('option[value='+countryCode+']').attr('data-description'));
-        });
-
-        var invoiceOnlyMode = $('#invoice-requested[type=hidden]') && $('#invoice-requested[type=hidden]').val() == 'true';
-
-        var euVATCheckingEnabled = $("#invoice[data-eu-vat-checking-enabled=true]").length === 1;
-
-        // invoice only mode
-        if(invoiceOnlyMode) {
-            $('#billing-address').attr('required', true).removeAttr('disabled');
-            $('#billing-address-container').removeClass(hiddenClasses);
-            $('#invoice').removeClass('hidden');
-            $("#eu-vat-check-countries").addClass(hiddenClasses);
         }
 
-        $("#add-company-billing-details").change(function() {
-            var checkbox = $(this);
-            if(checkbox.is(':checked')) {
-                var country = euBillingCountry.val() || '';
-                var isCountrySelected = country !== '';
-                var validateVATButton = $("#validateVAT");
-                if(isCountrySelected && $("#optgroup-eu-countries-list option[value="+country+"]").length === 1) {
-                    //EU country selected
-                    $('#eu-vat-check-countries').removeClass(hiddenClasses);
-                    $('#validation-result-container, #vat-number-container, #validateVAT').removeClass(hiddenClasses);
-                    $('#vatNr').attr('required', true).removeAttr('disabled');
-                    $("#vatCountryCode").attr('required', true).removeAttr('disabled', '');
-                    validateVATButton.text(validateVATButton.attr('data-text'));
-                    $('#billing-address').attr('required', false).attr('disabled');
-                    euBillingCountry.change();
-                    $("#continue-button").attr('disabled', true);
-                } else if(isCountrySelected) {
-                    $('#eu-vat-check-countries').addClass(hiddenClasses);
-                    $('#vatNr').val("");
-                    callVATValidation(validateVATButton.attr('data-validation-url'), $(this.form), function() {
-                        checkbox.attr('checked', false);
-                    }, function() {})
-                }
-            } else {
-                $('#billing-address').attr('required', true).removeAttr('disabled');
-                $('#billing-address-container').removeClass(hiddenClasses);
-                $("#eu-vat-check-countries").addClass(hiddenClasses);
-                $("#vatCountry").removeAttr('required').removeAttr('disabled', '');
-                $("#continue-button").removeAttr('disabled');
-            }
-
-        });
-        //
-
-        function callVATValidation(action, frm, errorHandler, completionHandler) {
-            $('#continue-button').attr('disabled', true);
-            jQuery.ajax({
-                url: action,
-                type: 'POST',
-                data: frm.serialize(),
-                success: function () {
-                    window.location.reload(true);
-                },
-                error: function (xhr, textStatus, errorThrown) {
-                    errorHandler(xhr);
-                },
-                complete: function (xhr) {
-                    var vatInput = $('#vatNr');
-                    if(vatInput.hasClass('has-error')) {
-                        $('#continue-button').attr('disabled', true);
-                    } else {
-                        $('#continue-button').attr('disabled', false);
-                    }
-                    completionHandler();
-                }
-
-            });
+        function isEUVatCheckingEnabled() {
+            return $("#payment-form[eu-vat-checking-enabled=true]").length === 1
         }
 
-        $('#validateVAT').click(function() {
-            var frm = $(this.form);
-            var action = $(this).attr('data-validation-url');
-            var vatInput = $('#vatNr');
-            vatInput.removeClass('has-error');
-            vatInput.parent('div').removeClass('has-error');
-            var vatNr = vatInput.val();
-            var country = euBillingCountry.val();
-            var resultContainer = $('#validation-result');
-            if(vatNr !== '' && country !== '') {
-                var btn = $(this);
-                var previousText = btn.text();
-                btn.html('<i class="fa fa-circle-o-notch fa-spin"></i>');
-                callVATValidation(action, frm, function(xhr) {
-                    vatInput.addClass('has-error');
-                    vatInput.parent('div').addClass('has-error');
-                    if (xhr.status === 400) {
-                        resultContainer.html(resultContainer.attr('data-validation-error-msg'));
-                    } else {
-                        resultContainer.html(resultContainer.attr('data-generic-error-msg'));
-                    }
-                }, function() {
-                    btn.text(previousText);
-                });
+        function isEUCountry(country) {
+            if(country) {
+                return $("#optgroup-eu-countries-list option[value="+country+"]").length == 1
+            } else {
+                return false;
             }
-        })
+        }
 
-        $('#reset-billing-information').click(function() {
-            var action = $(this).attr('data-reset-billing-information-url');
-            var frm = $(this.form);
-            jQuery.ajax({
-                url: action,
-                type:'POST',
-                success: function() {
-                    window.location.reload(true);
-                },
-                data:frm.serialize()
-            });
-        });
-
+        if($("#add-company-billing-details:checked, #invoice-requested:checked").length === 1) {
+            $("#selected-country-code").text($("#vatCountry").val())
+            $("#add-company-billing-details:checked, #invoice-requested:checked").change();
+        }
     });
-
-    window.recaptchaLoadCallback = function() {
-        window.recaptchaReady = true;
-        var methods = $('input[name=paymentMethod]');
-        if(methods.length === 1) {
-            methodSelected(methods.val());
-        } else if(methods.length === 0) {
-            $('#captcha-FREE').each(function(e) {
-                methodSelected('FREE');
-            });
-        }
-    };
-
-    var methodSelected = function(method) {
-        if((method === 'FREE' || method === 'OFFLINE' || method === 'ON_SITE') && window.recaptchaReady) {
-            $('.g-recaptcha').each(function(i, e) {
-                try {
-                    grecaptcha.reset(e.id);
-                } catch(x) {}
-            });
-            try {
-                grecaptcha.render('captcha-'+method, {
-                    'sitekey': $('#captcha-'+method).attr('data-sitekey'),
-                    'hl': $('html').attr('lang')
-                });
-            } catch(x) {}
-        }
-    };
-
 
 })();

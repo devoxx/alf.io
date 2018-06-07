@@ -34,26 +34,32 @@ import java.util.*;
 //
 @Data
 public class PaymentForm implements Serializable {
-    private String stripeToken;
+    /*private String stripeToken;
     private String paypalPaymentId;
-    private String paypalPayerID;
+    private String paypalPayerID;*/
     private String email;
     private String fullName;
     private String firstName;
     private String lastName;
     private String billingAddress;
     private String customerReference;
-    private String hmac;
+    //private String hmac;
     private Boolean cancelReservation;
-    private Boolean termAndConditionsAccepted;
-    private Boolean privacyPolicyAccepted;
-    private PaymentProxy paymentMethod;
+    //private PaymentProxy paymentMethod;
     private Boolean expressCheckoutRequested;
     private boolean postponeAssignment = false;
     private String vatCountryCode;
     private String vatNr;
     private boolean invoiceRequested = false;
     private Map<String, UpdateTicketOwnerForm> tickets = new HashMap<>();
+    //
+    //
+    private String billingAddressCompany;
+    private String billingAddressLine1;
+    private String billingAddressLine2;
+    private String billingAddressZip;
+    private String billingAddressCity;
+    private boolean addCompanyBillingDetails = false;
 
     private static void rejectIfOverLength(BindingResult bindingResult, String field, String errorCode,
             String value, int maxLength) {
@@ -62,26 +68,12 @@ public class PaymentForm implements Serializable {
         }
     }
 
-    public String getToken() {
-        if(paymentMethod == PaymentProxy.STRIPE) {
-            return stripeToken;
-        } else if(paymentMethod == PaymentProxy.PAYPAL) {
-            return paypalPaymentId;
-        } else {
-            return null;
-        }
-    }
-
-    public boolean hasPaypalTokens() {
-        return StringUtils.isNotBlank(paypalPayerID) && StringUtils.isNotBlank(paypalPaymentId);
-    }
-
     public void validate(BindingResult bindingResult, TotalPrice reservationCost, Event event,
                          List<TicketFieldConfiguration> fieldConf) {
 
         List<PaymentProxy> allowedPaymentMethods = event.getAllowedPaymentProxies();
 
-        Optional<PaymentProxy> paymentProxyOptional = Optional.ofNullable(paymentMethod);
+        /*Optional<PaymentProxy> paymentProxyOptional = Optional.ofNullable(paymentMethod);
         PaymentProxy paymentProxy = paymentProxyOptional.filter(allowedPaymentMethods::contains).orElse(PaymentProxy.STRIPE);
         boolean priceGreaterThanZero = reservationCost.getPriceWithVAT() > 0;
         boolean multiplePaymentMethods = allowedPaymentMethods.size() > 1;
@@ -94,7 +86,7 @@ public class PaymentForm implements Serializable {
         if(Objects.isNull(termAndConditionsAccepted) || !termAndConditionsAccepted
             || (StringUtils.isNotEmpty(event.getPrivacyPolicyUrl()) && (Objects.isNull(privacyPolicyAccepted) || !privacyPolicyAccepted)) ) {
             bindingResult.reject(ErrorsCode.STEP_2_TERMS_NOT_ACCEPTED);
-        }
+        }*/
         
         email = StringUtils.trim(email);
 
@@ -128,9 +120,9 @@ public class PaymentForm implements Serializable {
             bindingResult.rejectValue("email", ErrorsCode.STEP_2_INVALID_EMAIL);
         }
 
-        if (hasPaypalTokens() && !PaypalManager.isValidHMAC(new CustomerName(fullName, firstName, lastName, event), email, billingAddress, hmac, event)) {
+        /*if (hasPaypalTokens() && !PaypalManager.isValidHMAC(new CustomerName(fullName, firstName, lastName, event), email, billingAddress, hmac, event)) {
             bindingResult.reject(ErrorsCode.STEP_2_INVALID_HMAC);
-        }
+        }*/
 
         if(!postponeAssignment) {
             boolean success = Optional.ofNullable(tickets)
@@ -148,7 +140,11 @@ public class PaymentForm implements Serializable {
         return Optional.ofNullable(cancelReservation).orElse(false);
     }
 
-    public static PaymentForm fromExistingReservation(TicketReservation reservation) {
+    public boolean isBackFromOverview() {
+        return false;
+    }
+
+    public static PaymentForm fromExistingReservation(TicketReservation reservation, TicketReservationAdditionalInfo additionalInfo) {
         PaymentForm form = new PaymentForm();
         form.setFirstName(reservation.getFirstName());
         form.setLastName(reservation.getLastName());
@@ -159,6 +155,14 @@ public class PaymentForm implements Serializable {
         form.setVatNr(reservation.getVatNr());
         form.setInvoiceRequested(reservation.isInvoiceRequested());
         form.setCustomerReference(reservation.getCustomerReference());
+
+        form.setBillingAddressCompany(additionalInfo.getBillingAddressCompany());
+        form.setBillingAddressLine1(additionalInfo.getBillingAddressLine1());
+        form.setBillingAddressLine2(additionalInfo.getBillingAddressLine2());
+        form.setBillingAddressZip(additionalInfo.getBillingAddressZip());
+        form.setBillingAddressCity(additionalInfo.getBillingAddressCity());
+        form.setAddCompanyBillingDetails(additionalInfo.hasAddCompanyBillingDetails());
+
         return form;
     }
 

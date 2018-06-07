@@ -17,27 +17,15 @@
 package alfio.controller.api;
 
 import alfio.controller.api.support.TicketHelper;
-import alfio.controller.form.PaymentForm;
 import alfio.controller.form.UpdateTicketOwnerForm;
-import alfio.manager.EuVatChecker;
-import alfio.manager.TicketReservationManager;
 import alfio.manager.i18n.I18nManager;
 import alfio.model.*;
 import alfio.model.result.ValidationResult;
-import alfio.model.transaction.PaymentProxy;
-import alfio.repository.EventRepository;
-import alfio.repository.TicketReservationRepository;
-import alfio.util.Json;
 import alfio.util.TemplateManager;
 import lombok.AllArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -47,21 +35,14 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static alfio.model.PriceContainer.VatStatus.*;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-
 @RestController
 @AllArgsConstructor
 public class ReservationApiController {
 
-    private final EventRepository eventRepository;
     private final TicketHelper ticketHelper;
     private final TemplateManager templateManager;
     private final I18nManager i18nManager;
-    private final EuVatChecker vatChecker;
-    private final TicketReservationRepository ticketReservationRepository;
-    private final TicketReservationManager ticketReservationManager;
+
 
 
     @RequestMapping(value = "/event/{eventName}/ticket/{ticketIdentifier}/assign", method = RequestMethod.POST, headers = "X-Requested-With=XMLHttpRequest")
@@ -103,79 +84,5 @@ public class ReservationApiController {
         }
         result.put("validationResult", validationResult.orElse(ValidationResult.failed(new ValidationResult.ErrorDescriptor("fullName", "error.fullname"))));
         return result;
-    }
-
-    @PostMapping("/event/{eventName}/reservation/{reservationId}/reset-billing-info")
-    @Transactional
-    public ResponseEntity<Boolean> resetVat(@PathVariable("eventName") String eventName,
-                                            @PathVariable("reservationId") String reservationId) {
-        boolean res = eventRepository
-            .findOptionalByShortName(eventName)
-            .flatMap(e -> ticketReservationRepository.findOptionalReservationById(reservationId).map(r -> Pair.of(e, r)))
-            .filter(eventAndReservation -> eventAndReservation.getRight().getStatus() == TicketReservation.TicketReservationStatus.PENDING)
-            .map(eventAndReservation -> {
-                Event event = eventAndReservation.getLeft();
-                TicketReservation tr = eventAndReservation.getRight();
-                ticketReservationRepository.resetBillingData(tr.getId());
-
-                OrderSummary orderSummary = ticketReservationManager.orderSummaryForReservationId(reservationId, event, Locale.forLanguageTag(tr.getUserLanguage()));
-                ticketReservationRepository.addReservationInvoiceOrReceiptModel(reservationId, Json.toJson(orderSummary));
-                return true;
-            }).orElse(false);
-
-        return new ResponseEntity<>(res, res ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
-    }
-
-    @RequestMapping(value = "/event/{eventName}/reservation/{reservationId}/vat-validation", method = RequestMethod.POST)
-    @Transactional
-    public ResponseEntity<VatDetail> validateEUVat(@PathVariable("eventName") String eventName,
-                                                   @PathVariable("reservationId") String reservationId,
-                                                   PaymentForm paymentForm,
-                                                   Locale locale,
-                                                   HttpServletRequest request) {
-
-        String country = paymentForm.getVatCountryCode();
-        Optional<Triple<Event, TicketReservation, VatDetail>> vatDetail = eventRepository.findOptionalByShortName(eventName)
-            .flatMap(e -> ticketReservationRepository.findOptionalReservationById(reservationId).map(r -> Pair.of(e, r)))
-            .filter(e -> EnumSet.of(INCLUDED, NOT_INCLUDED).contains(e.getKey().getVatStatus()))
-            .filter(e -> vatChecker.isVatCheckingEnabledFor(e.getKey().getOrganizationId()))
-            .flatMap(e -> vatChecker.checkVat(paymentForm.getVatNr(), country, e.getKey().getOrganizationId()).map(vd -> Triple.of(e.getLeft(), e.getRight(), vd)));
-
-        vatDetail
-            .filter(t -> t.getRight().isValid())
-            .ifPresent(t -> {
-                VatDetail vd = t.getRight();
-                String billingAddress = vd.getName() + "\n" + vd.getAddress();
-                PriceContainer.VatStatus vatStatus = determineVatStatus(t.getLeft().getVatStatus(), t.getRight().isVatExempt());
-                ticketReservationRepository.updateBillingData(vatStatus, StringUtils.trimToNull(vd.getVatNr()), country, paymentForm.isInvoiceRequested(), reservationId);
-                OrderSummary orderSummary = ticketReservationManager.orderSummaryForReservationId(reservationId, t.getLeft(), Locale.forLanguageTag(t.getMiddle().getUserLanguage()));
-                ticketReservationRepository.addReservationInvoiceOrReceiptModel(reservationId, Json.toJson(orderSummary));
-                ticketReservationRepository.updateTicketReservation(reservationId, t.getMiddle().getStatus().name(), paymentForm.getEmail(),
-                    paymentForm.getFullName(), paymentForm.getFirstName(), paymentForm.getLastName(), locale.getLanguage(), billingAddress, null,
-                    Optional.ofNullable(paymentForm.getPaymentMethod()).map(PaymentProxy::name).orElse(null), paymentForm.getCustomerReference());
-                paymentForm.getTickets().forEach((ticketId, owner) -> {
-                    if(isNotEmpty(owner.getEmail()) && ((isNotEmpty(owner.getFirstName()) && isNotEmpty(owner.getLastName())) || isNotEmpty(owner.getFullName()))) {
-                        ticketHelper.preAssignTicket(eventName, reservationId, ticketId, owner, Optional.empty(), request, (tr) -> {}, Optional.empty());
-                    }
-                });
-            });
-
-        return vatDetail
-            .map(Triple::getRight)
-            .map(vd -> {
-                if(vd.isValid()) {
-                    return ResponseEntity.ok(vd);
-                } else {
-                    return new ResponseEntity<VatDetail>(HttpStatus.BAD_REQUEST);
-                }
-            })
-            .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
-    }
-
-    private static PriceContainer.VatStatus determineVatStatus(PriceContainer.VatStatus current, boolean isVatExempt) {
-        if(!isVatExempt) {
-            return current;
-        }
-        return current == NOT_INCLUDED ? NOT_INCLUDED_EXEMPT : INCLUDED_EXEMPT;
     }
 }
