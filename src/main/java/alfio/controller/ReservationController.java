@@ -347,6 +347,8 @@ public class ReservationController {
 
         //FIXME add VALIDATION, VAT CHECK and UPDATE
 
+        paymentForm.validate(bindingResult, event, ticketFieldRepository.findAdditionalFieldsForEvent(event.getId()));
+
         if(bindingResult.hasErrors()) {
             ticketReservationRepository.updateValidationStatus(reservationId, false);
             SessionUtil.addToFlash(bindingResult, redirectAttributes);

@@ -68,10 +68,10 @@ public class PaymentForm implements Serializable {
         }
     }
 
-    public void validate(BindingResult bindingResult, TotalPrice reservationCost, Event event,
+    public void validate(BindingResult bindingResult, Event event,
                          List<TicketFieldConfiguration> fieldConf) {
 
-        List<PaymentProxy> allowedPaymentMethods = event.getAllowedPaymentProxies();
+        //List<PaymentProxy> allowedPaymentMethods = event.getAllowedPaymentProxies();
 
         /*Optional<PaymentProxy> paymentProxyOptional = Optional.ofNullable(paymentMethod);
         PaymentProxy paymentProxy = paymentProxyOptional.filter(allowedPaymentMethods::contains).orElse(PaymentProxy.STRIPE);
@@ -110,11 +110,11 @@ public class PaymentForm implements Serializable {
         }
 
 
-        rejectIfOverLength(bindingResult, "billingAddress", ErrorsCode.STEP_2_MAX_LENGTH_BILLING_ADDRESS,
+        /*rejectIfOverLength(bindingResult, "billingAddress", ErrorsCode.STEP_2_MAX_LENGTH_BILLING_ADDRESS,
                 billingAddress, 450);
         if(invoiceRequested) {
             ValidationUtils.rejectIfEmptyOrWhitespace(bindingResult, "billingAddress", ErrorsCode.STEP_2_EMPTY_BILLING_ADDRESS);
-        }
+        }*/
 
         if (email != null && !email.contains("@") && !bindingResult.hasFieldErrors("email")) {
             bindingResult.rejectValue("email", ErrorsCode.STEP_2_INVALID_EMAIL);
