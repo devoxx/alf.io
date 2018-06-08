@@ -87,7 +87,7 @@ public class EuVatCheckerTest {
         assertEquals("------", vatDetail.getAddress());
     }
 
-    @Test
+    @Test(expected = IllegalStateException.class)
     public void performCheckRequestFailed() throws IOException {
         initResponse(404, "");
         Optional<VatDetail> result = EuVatChecker.performCheck("1234", "IE", 1).apply(configurationManager, client);
