@@ -65,6 +65,7 @@ create view reservation_and_ticket_and_tx as (select
     ticket.discount_cts t_discount_cts,
     ticket.ext_reference t_ext_reference,
 
+
     b_transaction.id bt_id,
     b_transaction.gtw_tx_id bt_gtw_tx_id,
     b_transaction.gtw_payment_id bt_gtw_payment_id,

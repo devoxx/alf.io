@@ -14,5 +14,6 @@
 -- You should have received a copy of the GNU General Public License
 -- along with alf.io.  If not, see <http://www.gnu.org/licenses/>.
 --
-
-alter table tickets_reservation alter column billing_address varchar(4096);
+drop view if exists reservation_and_ticket_and_tx;
+drop view if exists ticket_and_reservation_and_tx;
+alter table tickets_reservation alter column billing_address TYPE varchar(4096);
