@@ -68,10 +68,10 @@ public class PaymentForm implements Serializable {
         }
     }
 
-    public void validate(BindingResult bindingResult, TotalPrice reservationCost, Event event,
+    public void validate(BindingResult bindingResult, Event event,
                          List<TicketFieldConfiguration> fieldConf) {
 
-        List<PaymentProxy> allowedPaymentMethods = event.getAllowedPaymentProxies();
+        //List<PaymentProxy> allowedPaymentMethods = event.getAllowedPaymentProxies();
 
         /*Optional<PaymentProxy> paymentProxyOptional = Optional.ofNullable(paymentMethod);
         PaymentProxy paymentProxy = paymentProxyOptional.filter(allowedPaymentMethods::contains).orElse(PaymentProxy.STRIPE);
@@ -110,10 +110,25 @@ public class PaymentForm implements Serializable {
         }
 
 
-        rejectIfOverLength(bindingResult, "billingAddress", ErrorsCode.STEP_2_MAX_LENGTH_BILLING_ADDRESS,
-                billingAddress, 450);
+        /*rejectIfOverLength(bindingResult, "billingAddress", ErrorsCode.STEP_2_MAX_LENGTH_BILLING_ADDRESS,
+                billingAddress, 450);*/
+
+
         if(invoiceRequested) {
-            ValidationUtils.rejectIfEmptyOrWhitespace(bindingResult, "billingAddress", ErrorsCode.STEP_2_EMPTY_BILLING_ADDRESS);
+            //ValidationUtils.rejectIfEmptyOrWhitespace(bindingResult, "billingAddress", ErrorsCode.STEP_2_EMPTY_BILLING_ADDRESS);
+            ValidationUtils.rejectIfEmptyOrWhitespace(bindingResult, "billingAddressCompany", "error.emptyField");
+            rejectIfOverLength(bindingResult, "billingAddressCompany", "error.tooLong", billingAddressCompany, 256);
+
+            ValidationUtils.rejectIfEmptyOrWhitespace(bindingResult, "billingAddressLine1", "error.emptyField");
+            rejectIfOverLength(bindingResult, "billingAddressLine1", "error.tooLong", billingAddressLine1, 256);
+
+            rejectIfOverLength(bindingResult, "billingAddressLine2", "error.tooLong", billingAddressLine2, 256);
+
+            ValidationUtils.rejectIfEmptyOrWhitespace(bindingResult, "billingAddressZip", "error.emptyField");
+            rejectIfOverLength(bindingResult, "billingAddressZip", "error.tooLong", billingAddressZip, 51);
+
+            ValidationUtils.rejectIfEmptyOrWhitespace(bindingResult, "billingAddressCity", "error.emptyField");
+            rejectIfOverLength(bindingResult, "billingAddressCity", "error.tooLong", billingAddressCity, 256);
         }
 
         if (email != null && !email.contains("@") && !bindingResult.hasFieldErrors("email")) {
