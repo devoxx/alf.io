@@ -84,17 +84,19 @@
 
         <div class="row">
             <div class="col-xs-12">
-                <div class="form-group">
+                <div class="form-group {{#field-has-error}}[billingAddressCompany] has-error{{/field-has-error}}">
                     <label for="billingAddressCompany">{{#i18n}}reservation-page-complete.company{{/i18n}}</label>
-                    <input id="billingAddressCompany" name="billingAddressCompany" class="form-control" type="text" value="{{paymentForm.billingAddressCompany}}">
+                    <input id="billingAddressCompany" name="billingAddressCompany" class="form-control" type="text" value="{{paymentForm.billingAddressCompany}}" maxlength="255">
+                    {{#field-has-error}}[billingAddressCompany]<span class="help-block text-danger">{{#i18n}}{{#field-error}}billingAddressCompany{{/field-error}}{{/i18n}}</span>{{/field-has-error}}
                 </div>
             </div>
         </div>
         <div class="row">
             <div class="col-xs-12">
-                <div class="form-group">
+                <div class="form-group {{#field-has-error}}[billingAddressLine1] has-error{{/field-has-error}}">
                     <label for="billingAddressLine1">{{#i18n}}reservation-page.address-line-1{{/i18n}}</label>
-                    <input id="billingAddressLine1" name="billingAddressLine1" class="form-control" type="text" required value="{{paymentForm.billingAddressLine1}}">
+                    <input id="billingAddressLine1" name="billingAddressLine1" class="form-control" type="text" required value="{{paymentForm.billingAddressLine1}}" maxlength="255">
+                    {{#field-has-error}}[billingAddressLine1]<span class="help-block text-danger">{{#i18n}}{{#field-error}}billingAddressLine1{{/field-error}}{{/i18n}}</span>{{/field-has-error}}
                 </div>
             </div>
         </div>
@@ -102,21 +104,23 @@
             <div class="col-xs-12">
                 <div class="form-group">
                     <label for="billingAddressLine2">{{#i18n}}reservation-page.address-line-2{{/i18n}}</label>
-                    <input id="billingAddressLine2" name="billingAddressLine2" class="form-control" type="text" value="{{paymentForm.billingAddressLine2}}">
+                    <input id="billingAddressLine2" name="billingAddressLine2" class="form-control" type="text" value="{{paymentForm.billingAddressLine2}}" maxlength="255">
                 </div>
             </div>
         </div>
         <div class="row">
             <div class="col-xs-12 col-md-3">
-                <div class="form-group">
+                <div class="form-group {{#field-has-error}}[billingAddressZip] has-error{{/field-has-error}}">
                     <label for="billingAddressZip">{{#i18n}}reservation-page.zip-postal-code{{/i18n}}</label>
-                    <input id="billingAddressZip" name="billingAddressZip" class="form-control" type="text" required value="{{paymentForm.billingAddressZip}}">
+                    <input id="billingAddressZip" name="billingAddressZip" class="form-control" type="text" required value="{{paymentForm.billingAddressZip}}" maxlength="50">
+                    {{#field-has-error}}[billingAddressZip]<span class="help-block text-danger">{{#i18n}}{{#field-error}}billingAddressZip{{/field-error}}{{/i18n}}</span>{{/field-has-error}}
                 </div>
             </div>
             <div class="col-xs-12 col-md-9">
-                    <div class="form-group">
+                    <div class="form-group {{#field-has-error}}[billingAddressCity] has-error{{/field-has-error}}">
                         <label for="billingAddressCity">{{#i18n}}reservation-page.city{{/i18n}}</label>
-                        <input id="billingAddressCity" name="billingAddressCity" class="form-control" type="text" required value="{{paymentForm.billingAddressCity}}">
+                        <input id="billingAddressCity" name="billingAddressCity" class="form-control" type="text" required value="{{paymentForm.billingAddressCity}}" maxlength="255">
+                        {{#field-has-error}}[billingAddressCity]<span class="help-block text-danger">{{#i18n}}{{#field-error}}billingAddressCity{{/field-error}}{{/i18n}}</span>{{/field-has-error}}
                     </div>
             </div>
         </div>

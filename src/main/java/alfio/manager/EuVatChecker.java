@@ -78,11 +78,12 @@ public class EuVatChecker {
                     if(resp.isSuccessful()) {
                         return Optional.of(getVatDetail(resp, vatNr, countryCode, organizerCountry(configurationManager, organizationId)));
                     } else {
-                        return Optional.empty();
+                        log.warn("Response is not successful when calling the VAT NR check. Message is " + resp.message() +", code is:" + resp.code());
+                        throw new IllegalStateException();
                     }
                 } catch (IOException e) {
                     log.warn("Error while calling VAT NR check.", e);
-                    return Optional.empty();
+                    throw new IllegalStateException(e);
                 }
             } else if(!euCountryCode) {
                 String organizerCountry = organizerCountry(configurationManager, organizationId);
