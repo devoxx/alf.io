@@ -76,6 +76,7 @@
 
             .strong, strong {
                 font-weight: bold;
+                font-family: "DejaVu Sans Bold"
             }
 
             .mb {
