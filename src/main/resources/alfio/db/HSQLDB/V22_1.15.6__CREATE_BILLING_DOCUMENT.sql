@@ -15,4 +15,17 @@
 -- along with alf.io.  If not, see <http://www.gnu.org/licenses/>.
 --
 
-alter table tickets_reservation modify billing_address varchar(4096);
+CREATE TABLE billing_document (
+    id identity primary key not null,
+    event_id_fk integer not null,
+    number varchar(255) not null,
+    reservation_id_fk character(36) not null,
+    type varchar(255) not null,
+    model LONGVARCHAR,
+    generation_ts timestamp with time zone not null,
+    status varchar(255) not null
+);
+
+alter table billing_document add constraint "billing_document_event_id_fk" foreign key(event_id_fk) references event(id);
+alter table billing_document add constraint "billing_document_reservation_id_fk" foreign key(reservation_id_fk) references tickets_reservation(id);
+

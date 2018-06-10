@@ -49,7 +49,9 @@ public class Audit {
         UPDATE_INVOICE,
         FORCED_UPDATE_INVOICE,
         TERMS_CONDITION_ACCEPTED,
-        PRIVACY_POLICY_ACCEPTED
+        PRIVACY_POLICY_ACCEPTED,
+        CREDIT_NOTE_ISSUED,
+        BILLING_DOCUMENT_GENERATED
     }
 
     private final String reservationId;

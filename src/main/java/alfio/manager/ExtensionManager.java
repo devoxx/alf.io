@@ -38,6 +38,7 @@ public class ExtensionManager {
     public enum ExtensionEvent {
         RESERVATION_CONFIRMED,
         RESERVATION_CANCELLED,
+        RESERVATION_CREDIT_NOTE_ISSUED,
         TICKET_CANCELLED,
         RESERVATION_EXPIRED,
         TICKET_ASSIGNED,
@@ -167,6 +168,14 @@ public class ExtensionManager {
         Event event = eventRepository.findById(ticket.getEventId());
         payload.put("ticket", ticket);
         asyncCall(ExtensionEvent.TICKET_REVERT_CHECKED_IN, event, event.getOrganizationId(), payload);
+    }
+
+    void handleReservationsCreditNoteIssuedForEvent(Event event, List<String> reservationIds) {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("reservationIds", reservationIds);
+        payload.put("reservations", ticketReservationRepository.findByIds(reservationIds));
+
+        syncCall(ExtensionEvent.RESERVATION_CREDIT_NOTE_ISSUED, event, event.getOrganizationId(), payload, Boolean.class);
     }
 
 

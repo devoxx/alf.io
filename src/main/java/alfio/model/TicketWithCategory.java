@@ -34,4 +34,7 @@ public class TicketWithCategory {
         return category;
     }
 
+    public Ticket getTicket() {
+        return ticket;
+    }
 }

@@ -211,7 +211,7 @@ public class TicketReservationManagerIntegrationTest {
 
         assertTrue(ticketReservationManager.findById(reservationId2).isPresent());
 
-        ticketReservationManager.deleteOfflinePayment(event, reservationId2, false);
+        ticketReservationManager.deleteOfflinePayment(event, reservationId2, false, false, null);
 
         Assert.assertFalse(ticketReservationManager.findById(reservationId2).isPresent());
     }
@@ -361,7 +361,7 @@ public class TicketReservationManagerIntegrationTest {
         TotalPrice reservationCost = ticketReservationManager.totalReservationCostWithVAT(reservationId);
         PaymentResult result = ticketReservationManager.confirm("", null, event, reservationId, "test@test.ch", new CustomerName("full name", "full", "name", event), Locale.ENGLISH, "", "", reservationCost, Optional.empty(), Optional.of(PaymentProxy.OFFLINE), false, null, null, null, false, false);
         assertTrue(result.isSuccessful());
-        ticketReservationManager.deleteOfflinePayment(event, reservationId, false);
+        ticketReservationManager.deleteOfflinePayment(event, reservationId, false, false, null);
         waitingQueueManager.distributeSeats(event);
 
         mod = new TicketReservationWithOptionalCodeModification(tr, Optional.empty());

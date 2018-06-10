@@ -37,7 +37,6 @@ import alfio.repository.TicketFieldRepository;
 import alfio.repository.TicketReservationRepository;
 import alfio.repository.user.OrganizationRepository;
 import alfio.util.ErrorsCode;
-import alfio.util.Json;
 import alfio.util.TemplateManager;
 import alfio.util.TemplateResource;
 import lombok.AllArgsConstructor;
@@ -151,15 +150,7 @@ public class ReservationController {
                              .addAttribute("showPostpone", !forceAssignment && ticketsInReservation.size() > 1);
                     }
 
-                    try {
-                        model.addAttribute("delayForOfflinePayment", Math.max(1, TicketReservationManager.getOfflinePaymentWaitingPeriod(event, configurationManager)));
-                    } catch (TicketReservationManager.OfflinePaymentException e) {
-                        if(event.getAllowedPaymentProxies().contains(PaymentProxy.OFFLINE)) {
-                            log.error("Already started event {} has been found with OFFLINE payment enabled" , event.getDisplayName() , e);
-                        }
-                        model.addAttribute("delayForOfflinePayment", 0);
-                    }
-
+                    addDelayForOffline(model, event);
 
 
                     boolean invoiceAllowed = configurationManager.hasAllConfigurationsForInvoice(event) || vatChecker.isVatCheckingEnabledFor(event.getOrganizationId());
@@ -305,7 +296,6 @@ public class ReservationController {
             paymentForm.getBillingAddressZip(), paymentForm.getBillingAddressCity(), paymentForm.getVatCountryCode(),
             paymentForm.getVatNr(), paymentForm.isInvoiceRequested(), paymentForm.isAddCompanyBillingDetails(), true);
 
-        ticketReservationRepository.addReservationInvoiceOrReceiptModel(reservationId, Json.toJson(ticketReservationManager.orderSummaryForReservationId(reservationId, event, locale)));
 
         assignTickets(event.getShortName(), reservationId, paymentForm, bindingResult, request, true);
 
@@ -341,8 +331,6 @@ public class ReservationController {
                         VatDetail vd = t.getRight();
                         PriceContainer.VatStatus vatStatus = determineVatStatus(t.getLeft().getVatStatus(), t.getRight().isVatExempt());
                         ticketReservationRepository.updateBillingData(vatStatus, StringUtils.trimToNull(vd.getVatNr()), country, paymentForm.isInvoiceRequested(), reservationId);
-                        OrderSummary orderSummary = ticketReservationManager.orderSummaryForReservationId(reservationId, t.getLeft(), Locale.forLanguageTag(t.getMiddle().getUserLanguage()));
-                        ticketReservationRepository.addReservationInvoiceOrReceiptModel(reservationId, Json.toJson(orderSummary));
                     });
             } catch (IllegalStateException ise) {//vat checker failure
                 bindingResult.rejectValue("vatNr", "error.vatVIESDown");
@@ -387,14 +375,7 @@ public class ReservationController {
 
                     OrderSummary orderSummary = ticketReservationManager.orderSummaryForReservationId(reservationId, event, locale);
 
-                    try {
-                        model.addAttribute("delayForOfflinePayment", Math.max(1, TicketReservationManager.getOfflinePaymentWaitingPeriod(event, configurationManager)));
-                    } catch (TicketReservationManager.OfflinePaymentException e) {
-                        if(event.getAllowedPaymentProxies().contains(PaymentProxy.OFFLINE)) {
-                            log.error("Already started event {} has been found with OFFLINE payment enabled" , event.getDisplayName() , e);
-                        }
-                        model.addAttribute("delayForOfflinePayment", 0);
-                    }
+                    addDelayForOffline(model, event);
 
 
                     List<PaymentProxy> activePaymentMethods = paymentManager.getPaymentMethods(event.getOrganizationId())
@@ -414,6 +395,17 @@ public class ReservationController {
                     return "/event/overview";
                 }).orElseGet(() -> redirectReservation(Optional.empty(), eventName, reservationId)))
             .orElse("redirect:/");
+    }
+
+    private void addDelayForOffline(Model model, Event event) {
+        try {
+            model.addAttribute("delayForOfflinePayment", Math.max(1, TicketReservationManager.getOfflinePaymentWaitingPeriod(event, configurationManager)));
+        } catch (TicketReservationManager.OfflinePaymentException e) {
+            if(event.getAllowedPaymentProxies().contains(PaymentProxy.OFFLINE)) {
+                log.error("Already started event {} has been found with OFFLINE payment enabled" , event.getDisplayName() , e);
+            }
+            model.addAttribute("delayForOfflinePayment", 0);
+        }
     }
 
     @RequestMapping(value = "/event/{eventName}/reservation/{reservationId}/failure", method = RequestMethod.GET)
@@ -568,7 +560,7 @@ public class ReservationController {
         }
 
         if (cancelReservation) {
-            ticketReservationManager.cancelPendingReservation(reservationId, false);
+            ticketReservationManager.cancelPendingReservation(reservationId, false, null);
             SessionUtil.removeSpecialPriceData(request);
             return Optional.of("redirect:/event/" + eventName + "/");
         }
@@ -618,12 +610,13 @@ public class ReservationController {
         CustomerName customerName = new CustomerName(ticketReservation.getFullName(), ticketReservation.getFirstName(), ticketReservation.getLastName(), event);
 
         //handle paypal redirect!
+        boolean invoiceRequested = ticketReservation.isInvoiceRequested();
         if(paymentForm.getPaymentMethod() == PaymentProxy.PAYPAL && !paymentForm.hasPaypalTokens()) {
             OrderSummary orderSummary = ticketReservationManager.orderSummaryForReservationId(reservationId, event, locale);
             try {
                 String checkoutUrl = paymentManager.createPayPalCheckoutRequest(event, reservationId, orderSummary, customerName,
                     ticketReservation.getEmail(), ticketReservation.getBillingAddress(), ticketReservation.getCustomerReference(), locale, false,
-                    ticketReservation.isInvoiceRequested());
+                    invoiceRequested);
                 //assignTickets(eventName, reservationId, paymentForm, bindingResult, request, true);
                 return "redirect:" + checkoutUrl;
             } catch (Exception e) {
@@ -639,7 +632,7 @@ public class ReservationController {
             try {
                 String checkoutUrl = mollieManager.createCheckoutRequest(event, reservationId, orderSummary, customerName,
                     ticketReservation.getEmail(), ticketReservation.getBillingAddress(), locale,
-                    ticketReservation.isInvoiceRequested(),
+                    invoiceRequested,
                     ticketReservation.getVatCountryCode(),
                     ticketReservation.getVatNr(),
                     ticketReservation.getVatStatus());
@@ -655,7 +648,7 @@ public class ReservationController {
 
         final PaymentResult status = ticketReservationManager.confirm(paymentForm.getToken(), paymentForm.getPaypalPayerID(), event, reservationId, ticketReservation.getEmail(),
             customerName, locale, ticketReservation.getBillingAddress(), ticketReservation.getCustomerReference(), reservationCost, SessionUtil.retrieveSpecialPriceSessionId(request),
-                Optional.ofNullable(paymentForm.getPaymentMethod()), ticketReservation.isInvoiceRequested(), ticketReservation.getVatCountryCode(),
+                Optional.ofNullable(paymentForm.getPaymentMethod()), invoiceRequested, ticketReservation.getVatCountryCode(),
             ticketReservation.getVatNr(), ticketReservation.getVatStatus(), paymentForm.getTermAndConditionsAccepted(), Optional.ofNullable(paymentForm.getPrivacyPolicyAccepted()).orElse(false));
 
         if(!status.isSuccessful()) {
@@ -668,6 +661,9 @@ public class ReservationController {
 
         //
         TicketReservation reservation = ticketReservationManager.findById(reservationId).orElseThrow(IllegalStateException::new);
+        if(invoiceRequested || EnumSet.of(PaymentProxy.STRIPE, PaymentProxy.PAYPAL).contains(paymentForm.getPaymentMethod())) {
+            ticketReservationManager.getOrCreateBillingDocumentModel(event, reservation, null);
+        }
         sendReservationCompleteEmail(request, event,reservation);
         sendReservationCompleteEmailToOrganizer(request, event, reservation);
         //

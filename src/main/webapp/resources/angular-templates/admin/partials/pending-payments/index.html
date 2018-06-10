@@ -33,7 +33,7 @@
                             <td data-ng-class-even="'active'" class="text-right">{{reservation.right.totalPrice | currency:"€"}}</td>
                             <td data-ng-class-even="'active'">{{reservation.left.fullName}}</td>
                             <td data-ng-class-even="'active'">{{reservation.left.email}}</td>
-                            <td data-ng-class-even="'active'"><button class="btn btn-success btn-xs" data-ng-disabled="loading" data-ng-click="registerPayment(eventName, reservation.left.id)"><i class="fa fa-check"></i> confirm</button> <button data-ng-disabled="loading" data-ng-click="deletePayment(eventName, reservation.left.id)" class="btn btn-danger btn-xs"><i class="fa fa-trash-o"></i> delete</button></td>
+                            <td data-ng-class-even="'active'"><button class="btn btn-success btn-xs" data-ng-disabled="loading" data-ng-click="registerPayment(eventName, reservation.left.id)"><i class="fa fa-check"></i> confirm</button> <button data-ng-disabled="loading" data-ng-click="deletePayment(eventName, reservation.left.id, true)" class="btn btn-warning btn-xs"><i class="fa fa-ban"></i> credit</button> <button data-ng-disabled="loading" data-ng-click="deletePayment(eventName, reservation.left.id, false)" class="btn btn-danger btn-xs"><i class="fa fa-trash-o"></i> delete</button></td>
                         </tr>
                     </tbody>
                 </table>
