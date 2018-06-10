@@ -591,10 +591,15 @@ public class TicketReservationManager {
         Map<Integer, List<Ticket>> ticketsByCategory = ticketRepository.findTicketsInReservation(reservation.getId())
             .stream()
             .collect(groupingBy(Ticket::getCategoryId));
-        List<TicketWithCategory> ticketsWithCategory = ticketCategoryRepository.findByIds(ticketsByCategory.keySet())
-            .stream()
-            .flatMap(tc -> ticketsByCategory.get(tc.getId()).stream().map(t -> new TicketWithCategory(t, tc)))
-            .collect(Collectors.toList());
+        final List<TicketWithCategory> ticketsWithCategory;
+        if(!ticketsByCategory.isEmpty()) {
+            ticketsWithCategory = ticketCategoryRepository.findByIds(ticketsByCategory.keySet())
+                .stream()
+                .flatMap(tc -> ticketsByCategory.get(tc.getId()).stream().map(t -> new TicketWithCategory(t, tc)))
+                .collect(Collectors.toList());
+        } else {
+            ticketsWithCategory = Collections.emptyList();
+        }
         boolean euBusiness = StringUtils.isNotBlank(reservation.getVatCountryCode()) && StringUtils.isNotBlank(reservation.getVatNr())
             && configurationManager.getRequiredValue(getSystemConfiguration(ConfigurationKeys.EU_COUNTRIES_LIST)).contains(reservation.getVatCountryCode())
             && PriceContainer.VatStatus.isVatExempt(reservation.getVatStatus());
