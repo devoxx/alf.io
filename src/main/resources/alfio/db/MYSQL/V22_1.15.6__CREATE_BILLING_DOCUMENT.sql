@@ -15,4 +15,17 @@
 -- along with alf.io.  If not, see <http://www.gnu.org/licenses/>.
 --
 
-alter table tickets_reservation modify billing_address varchar(4096);
+CREATE TABLE billing_document (
+    id integer auto_increment primary key not null,
+    event_id_fk integer not null,
+    number varchar(255) not null,
+    reservation_id_fk char(36) not null,
+    type varchar(255) not null,
+    model MEDIUMTEXT,
+    generation_ts timestamp not null,
+    status varchar(255) not null
+) ENGINE=InnoDB CHARACTER SET=utf8 COLLATE utf8_bin;
+
+alter table billing_document add foreign key(event_id_fk) references event(id);
+alter table billing_document add foreign key(reservation_id_fk) references tickets_reservation(id);
+

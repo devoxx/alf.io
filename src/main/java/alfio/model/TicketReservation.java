@@ -32,7 +32,7 @@ import java.util.*;
 public class TicketReservation {
 
     public enum TicketReservationStatus {
-        PENDING, IN_PAYMENT, EXTERNAL_PROCESSING_PAYMENT, OFFLINE_PAYMENT, COMPLETE, STUCK, CANCELLED
+        PENDING, IN_PAYMENT, EXTERNAL_PROCESSING_PAYMENT, OFFLINE_PAYMENT, COMPLETE, STUCK, CANCELLED, CREDIT_NOTE_ISSUED
     }
 
     private final String id;
@@ -142,7 +142,7 @@ public class TicketReservation {
     }
 
     public boolean getHasInvoiceOrReceiptDocument() {
-        return invoiceModel != null;
+        return invoiceRequested || status == TicketReservationStatus.COMPLETE;
     }
 
     public boolean getHasBeenPaid() {

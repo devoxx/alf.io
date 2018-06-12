@@ -22,6 +22,7 @@
         ctrl.formatFullName = formatFullName;
         ctrl.updateFilteredData = loadData;
         ctrl.truncateReservationId = truncateReservationId;
+        ctrl.statusIcon = statusIcon;
 
         this.$onInit = function() {
             EventService.getAllReservationStatus(ctrl.event.shortName).then(function(res) {
@@ -61,6 +62,19 @@
 
         function truncateReservationId(id) {
             return id.substring(0,8).toUpperCase();
+        }
+
+        function statusIcon(status) {
+            switch(status) {
+                case 'COMPLETE':
+                    return 'text-success fa-check-circle';
+                case 'OFFLINE_PAYMENT':
+                    return 'fa-money';
+                case 'CREDIT_NOTE_ISSUED':
+                    return 'fa-undo';
+                default:
+                    return 'text-danger fa-exclamation';
+            }
         }
     }
 })();

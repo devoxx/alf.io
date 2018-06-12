@@ -1656,12 +1656,13 @@
                 $scope.loading = false;
             });
         };
-        $scope.deletePayment = function(eventName, id) {
-            if(!$window.confirm('Do you really want to delete this reservation?')) {
+        $scope.deletePayment = function(eventName, id, credit) {
+            var action = credit ? "credit" : "cancel";
+            if(!$window.confirm('Do you really want to '+action+' this reservation?')) {
                 return;
             }
             $scope.loading = true;
-            EventService.cancelPayment(eventName, id).success(function() {
+            EventService.cancelPayment(eventName, id, credit).success(function() {
                 getPendingPayments(true);
             }).error(function() {
                 $scope.loading = false;
