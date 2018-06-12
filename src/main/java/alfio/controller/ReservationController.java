@@ -351,7 +351,7 @@ public class ReservationController {
 
         //
 
-        paymentForm.validate(bindingResult, event, ticketFieldRepository.findAdditionalFieldsForEvent(event.getId()));
+        paymentForm.validate(bindingResult, event, ticketFieldRepository.findAdditionalFieldsForEvent(event.getId()), companyVatChecked);
 
         if(bindingResult.hasErrors()) {
             ticketReservationRepository.updateValidationStatus(reservationId, false);
