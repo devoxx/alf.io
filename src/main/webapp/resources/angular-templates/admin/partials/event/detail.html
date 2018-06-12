@@ -53,6 +53,7 @@
                                         <uib-bar value="ticketCategory.checkedInTickets" type="success" uib-tooltip="Checked in ({{ticketCategory.checkedInTickets}})"><span>{{ticketCategory.checkedInTickets}}</span></uib-bar>
                                         <uib-bar value="ticketCategory.soldTickets" type="warning" uib-tooltip="Sold ({{ticketCategory.soldTickets}})"><span>{{ticketCategory.soldTickets}}</span></uib-bar>
                                         <uib-bar value="ticketCategory.notSoldTickets" type="info" uib-tooltip="Still available ({{ticketCategory.notSoldTickets}})">{{ticketCategory.notSoldTickets}}</uib-bar>
+                                        <uib-bar value="ticketCategory.pendingTickets" type="info" style="background-color:#7670b7" uib-tooltip="Reservation in progress ({{ticketCategory.pendingTickets}})">{{ticketCategory.pendingTickets}}</uib-bar>
                                         <uib-bar ng-if="!ticketCategory.bounded" value="event.dynamicAllocation" type="default" uib-tooltip="Dynamically allocated ({{event.dynamicAllocation}})">{{event.dynamicAllocation}}</uib-bar>
                                     </uib-progress>
                                 </div>
