@@ -561,11 +561,15 @@ public class TicketReservationManager {
     @Transactional
     Map<String, Object> createBillingDocumentModel(Event event, TicketReservation reservation, String username) {
         Optional<String> vat = getVAT(event);
-        OrderSummary summary = orderSummaryForReservationId(reservation.getId(), event, Locale.forLanguageTag(reservation.getUserLanguage()));
+        String existingModel = reservation.getInvoiceModel();
+        boolean existingModelPresent = StringUtils.isNotBlank(existingModel);
+        OrderSummary summary = existingModelPresent ? Json.fromJson(existingModel, OrderSummary.class) : orderSummaryForReservationId(reservation.getId(), event, Locale.forLanguageTag(reservation.getUserLanguage()));
         Map<String, Object> model = prepareModelForReservationEmail(event, reservation, vat, summary);
         String number = reservation.getHasInvoiceNumber() ? reservation.getInvoiceNumber() : UUID.randomUUID().toString();
-        //we still save invoice/receipt model to tickets_reservation for backward compatibility
-        ticketReservationRepository.addReservationInvoiceOrReceiptModel(reservation.getId(), Json.toJson(summary));
+        if(!existingModelPresent) {
+            //we still save invoice/receipt model to tickets_reservation for backward compatibility
+            ticketReservationRepository.addReservationInvoiceOrReceiptModel(reservation.getId(), Json.toJson(summary));
+        }
         AffectedRowCountAndKey<Integer> doc = billingDocumentRepository.insert(event.getId(), reservation.getId(), number, reservation.getHasInvoiceNumber() ? INVOICE : RECEIPT, Json.toJson(model), ZonedDateTime.now());
         auditingRepository.insert(reservation.getId(), userRepository.nullSafeFindIdByUserName(username).orElse(null), event.getId(), Audit.EventType.BILLING_DOCUMENT_GENERATED, new Date(), Audit.EntityType.RESERVATION, reservation.getId(), singletonList(singletonMap("documentId", doc.getKey())));
         return model;
