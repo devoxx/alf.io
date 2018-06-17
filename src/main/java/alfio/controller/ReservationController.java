@@ -550,7 +550,7 @@ public class ReservationController {
         }
 
         Optional<TicketReservation> ticketReservation = ticketReservationManager.findById(reservationId);
-        if (!ticketReservation.isPresent()) {
+        if (!ticketReservation.isPresent() || ticketReservation.get().getStatus() != TicketReservationStatus.PENDING) {
             return Optional.of(redirectReservation(ticketReservation, eventName, reservationId));
         }
 
