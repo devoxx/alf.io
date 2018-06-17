@@ -20,6 +20,7 @@
         ctrl.currentPage = currentSearch.page || 1;
         ctrl.currentPagePendingPayment = currentSearch.pendingPaymentPage || 1;
         ctrl.currentPageCancelled = currentSearch.cancelledPage || 1;
+        ctrl.currentPageCredited = currentSearch.creditedPage || 1;
         ctrl.toSearch = currentSearch.search || '';
         ctrl.selectedTab = currentSearch.t || 1;
 
@@ -35,15 +36,16 @@
 
         function loadData(loadPartially) {
 
-            loadPartially = loadPartially || {pending: true, completed: true, paymentPending: true, cancelled: true, stuck: true};
+            loadPartially = loadPartially || {pending: true, completed: true, paymentPending: true, cancelled: true, credited: true, stuck: true};
 
             $location.search({
                 pendingPage: ctrl.currentPagePending,
                 pendingPaymentPage: ctrl.currentPagePendingPayment,
                 cancelledPage: ctrl.currentPageCancelled,
+                creditedPage: ctrl.currentPageCredited,
                 page: ctrl.currentPage,
                 search: ctrl.toSearch,
-                t: ctrl.selectedTab
+                t: ctrl.selectedTab,
             });
 
             if(loadPartially.completed) {
@@ -78,6 +80,13 @@
                 EventService.findAllReservations(ctrl.event.shortName, 0, ctrl.toSearch, ['STUCK']).then(function(res) {
                     ctrl.stuckReservations = res.data.left;
                     ctrl.foundStuckReservations = res.data.right;
+                });
+            }
+
+            if(loadPartially.credited) {
+                EventService.findAllReservations(ctrl.event.shortName, 0, ctrl.toSearch, ['CREDIT_NOTE_ISSUED']).then(function(res) {
+                    ctrl.creditedReservations = res.data.left;
+                    ctrl.foundCreditedReservations = res.data.right;
                 });
             }
         }
