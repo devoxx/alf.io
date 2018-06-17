@@ -215,7 +215,21 @@
             var val = $(this).val();
             $("#selected-country-code").text(val);
             handleRequiredVatNR();
+
+            addBillingDetailsCheckIfApplicable();
         });
+
+        $("#billingAddressCompany").change(function() {
+            addBillingDetailsCheckIfApplicable();
+        });
+
+        function addBillingDetailsCheckIfApplicable() {
+            var company = $("#billingAddressCompany").val();
+            var countryCode = $("#vatCountry").val();
+            if(company != null && company.trim().length > 0 && isEUCountry(countryCode) && $("#add-company-billing-details:checked").length === 0) {
+                $("#add-company-billing-details").click();
+            }
+        }
 
         $("#add-company-billing-details, #invoice-requested").change(function() {
             $("#selected-country-code").text($("#vatCountry").val())
@@ -230,7 +244,6 @@
             }
             handleRequiredVatNR();
         });
-
 
         function handleRequiredVatNR() {
             var vatNrChecked = $("#add-company-billing-details:checked, #invoice-requested:checked").length === 1;
