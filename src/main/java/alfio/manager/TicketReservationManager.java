@@ -1057,13 +1057,13 @@ public class TicketReservationManager {
         List<String> wrappedReservationIdToRemove = Collections.singletonList(reservationIdToRemove);
         waitingQueueManager.cleanExpiredReservations(wrappedReservationIdToRemove);
         //
+        boolean deleteReservation = false;
         if(!credit) {
             int result = billingDocumentRepository.deleteForReservation(reservationIdToRemove, event.getId());
             if(result > 0) {
                 log.warn("deleted {} documents for reservation id {}", result, reservationIdToRemove);
             }
-            int removedReservation = ticketReservationRepository.remove(wrappedReservationIdToRemove);
-            Validate.isTrue(removedReservation == 1, "expected exactly one removed reservation, got " + removedReservation);
+            deleteReservation = true;
         } else {
             issueCreditNoteForReservation(event, reservationIdToRemove, username);
         }
@@ -1074,6 +1074,11 @@ public class TicketReservationManager {
             extensionManager.handleReservationsCancelledForEvent(event, wrappedReservationIdToRemove);
         } else {
             extensionManager.handleReservationsCreditNoteIssuedForEvent(event, wrappedReservationIdToRemove);
+        }
+
+        if(deleteReservation) {
+            int removedReservation = ticketReservationRepository.remove(wrappedReservationIdToRemove);
+            Validate.isTrue(removedReservation == 1, "expected exactly one removed reservation, got " + removedReservation);
         }
 
         //
