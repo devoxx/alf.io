@@ -31,9 +31,9 @@
                     <span data-ng-if="promocode.discountType === 'PERCENTAGE'">{{::promocode.discountAmount}}%</span>
                     <span data-ng-if="promocode.discountType === 'FIXED_AMOUNT'">{{::promocode.formattedDiscountAmount | currency : ($ctrl.event.currency || "")}}</span>
                 </td>
-                <td ng-if="$ctrl.forEvent"><div ng-if="promocode.categories.length > 0"><p ng-repeat="categoryId in promocode.categories">{{::ticketCategoriesById[categoryId].name}}</p></div><div class="text-muted" ng-if="promocode.categories.length == 0 || promocode.categories == null">Apply to all</div></td>
+                <td ng-if="$ctrl.forEvent"><div ng-if="promocode.categories.length > 0"><p ng-repeat="categoryId in promocode.categories">{{::$ctrl.ticketCategoriesById[categoryId].name}}</p></div><div class="text-muted" ng-if="promocode.categories.length == 0 || promocode.categories == null">Apply to all</div></td>
                 <td>
-                    <button class="btn btn-sm btn-default" ng-click="$ctrl.changeDate(promocode)"><i class="fa fa-calendar"></i> Change date</button>
+                    <button class="btn btn-sm btn-default" ng-click="$ctrl.changeDate(promocode)"><i class="fa fa-edit"></i> Edit Settings</button>
                     <button data-ng-hide="promocode.expired" class="btn btn-sm btn-default" data-ng-click="$ctrl.disablePromocode(promocode)"><i class="fa fa-remove"></i> Disable</button>
                     <button data-ng-show="promocode.useCount === 0" class="btn btn-sm btn-default" data-ng-click="$ctrl.deletePromocode(promocode)"><i class="fa fa-trash"></i> Delete</button>
                 </td>

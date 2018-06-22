@@ -16,15 +16,18 @@
  */
 package alfio.model.modification;
 
-import java.math.BigDecimal;
-import java.util.List;
-
-import lombok.Getter;
 import alfio.model.PromoCodeDiscount.DiscountType;
 import alfio.util.MonetaryUtil;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+
+import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Getter
 public class PromoCodeDiscountModification {
@@ -38,6 +41,7 @@ public class PromoCodeDiscountModification {
     private final DiscountType discountType;
     private final List<Integer> categories;
     private final Integer utcOffset;
+    private final Integer maxUsage;
 
     @JsonCreator
     public PromoCodeDiscountModification(
@@ -49,7 +53,9 @@ public class PromoCodeDiscountModification {
             @JsonProperty("discountAmount") BigDecimal discountAmount,
             @JsonProperty("discountType") DiscountType discountType,
             @JsonProperty("categories") List<Integer> categories,
-            @JsonProperty("utcOffset") Integer utcOffset) {
+            @JsonProperty("utcOffset") Integer utcOffset,
+            @JsonProperty("maxUsage") Integer maxUsage) {
+
         this.organizationId = organizationId;
         this.eventId = eventId;
         this.promoCode = promoCode;
@@ -57,8 +63,9 @@ public class PromoCodeDiscountModification {
         this.end = end;
         this.discountAmount = discountAmount;
         this.discountType = discountType;
-        this.categories = categories;
+        this.categories = Optional.ofNullable(categories).map(l -> l.stream().filter(Objects::nonNull).collect(Collectors.toList())).orElse(Collections.emptyList());
         this.utcOffset = utcOffset;
+        this.maxUsage = maxUsage;
     }
     
     public int getDiscountAsPercent() {

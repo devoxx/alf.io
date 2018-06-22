@@ -16,6 +16,14 @@
     <a><span class="badge">4</span> <span class="hidden-xs">{{#i18n}}breadcrumb.step4{{/i18n}}</span></a>
 </div>
 
+{{#hasErrors}}
+    {{#error.globalErrors}}
+        <div class="alert alert-danger" role="alert">
+            <p><strong>{{#i18n}}{{.}}{{/i18n}}</strong></p>
+        </div>
+    {{/error.globalErrors}}
+{{/hasErrors}}
+
 <div class="alert alert-info text-center">
     <i class="fa fa-clock-o"></i>
     <span id="validity-container"><span data-validity="{{reservation.validity.time}}"
