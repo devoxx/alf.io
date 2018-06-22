@@ -12,6 +12,7 @@
             <tr>
                 <th>Code</th>
                 <th><abbr title="Usage count">count</abbr></th>
+                <th>Limit</th>
                 <th>Start</th>
                 <th>End</th>
                 <th>Type</th>
@@ -24,6 +25,7 @@
             <tr data-ng-repeat="promocode in $ctrl.promocodes" data-ng-class="{'text-muted': promocode.expired}">
                 <td>{{::promocode.promoCode}} <span data-ng-if="promocode.expired">(Expired)</span></td>
                 <td>{{promocode.useCount}}</td>
+                <td>{{promocode.maxUsage}}</td>
                 <td>{{::promocode.formattedStart | formatDate}}</td>
                 <td>{{::promocode.formattedEnd | formatDate}}</td>
                 <td>{{::promocode.discountType}}</td>
