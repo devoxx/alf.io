@@ -212,6 +212,7 @@ public class AdminReservationManager {
                 customerData.getFullName(), customerData.getFirstName(), customerData.getLastName(), customerData.getUserLanguage(),
                 customerData.getBillingAddress(), r.getConfirmationTimestamp(),
                 Optional.ofNullable(r.getPaymentMethod()).map(PaymentProxy::name).orElse(null), customerData.getCustomerReference());
+            ticketReservationManager.createBillingDocumentModel(event, ticketReservationRepository.findReservationById(reservationId), username);
         }
         arm.getTicketsInfo().stream()
             .filter(TicketsInfo::isUpdateAttendees)
