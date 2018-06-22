@@ -63,6 +63,7 @@
                     userLanguage: src.userLanguage,
                     vatNr: src.vatNr,
                     vatCountryCode: src.vatCountryCode,
+                    customerReference: src.customerReference,
                     invoiceRequested: src.invoiceRequested
                 },
                 language: src.userLanguage
