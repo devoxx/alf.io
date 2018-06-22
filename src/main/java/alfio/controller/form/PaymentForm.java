@@ -69,7 +69,7 @@ public class PaymentForm implements Serializable {
     }
 
     public void validate(BindingResult bindingResult, Event event,
-                         List<TicketFieldConfiguration> fieldConf) {
+                         List<TicketFieldConfiguration> fieldConf, boolean companyVatChecked) {
 
         //List<PaymentProxy> allowedPaymentMethods = event.getAllowedPaymentProxies();
 
@@ -116,8 +116,10 @@ public class PaymentForm implements Serializable {
 
         if(invoiceRequested) {
             //ValidationUtils.rejectIfEmptyOrWhitespace(bindingResult, "billingAddress", ErrorsCode.STEP_2_EMPTY_BILLING_ADDRESS);
-            ValidationUtils.rejectIfEmptyOrWhitespace(bindingResult, "billingAddressCompany", "error.emptyField");
-            rejectIfOverLength(bindingResult, "billingAddressCompany", "error.tooLong", billingAddressCompany, 256);
+            if(companyVatChecked) {
+                ValidationUtils.rejectIfEmptyOrWhitespace(bindingResult, "billingAddressCompany", "error.emptyField");
+                rejectIfOverLength(bindingResult, "billingAddressCompany", "error.tooLong", billingAddressCompany, 256);
+            }
 
             ValidationUtils.rejectIfEmptyOrWhitespace(bindingResult, "billingAddressLine1", "error.emptyField");
             rejectIfOverLength(bindingResult, "billingAddressLine1", "error.tooLong", billingAddressLine1, 256);
