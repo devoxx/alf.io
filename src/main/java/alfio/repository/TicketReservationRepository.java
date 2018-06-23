@@ -186,6 +186,7 @@ public interface TicketReservationRepository {
         " billing_address_zip = :billingAddressZip, " +
         " billing_address_city = :billingAddressCity, " +
         " add_company_billing_details = :addCompanyBillingDetails, " +
+        " customer_reference = :customerReference, "+
         " validated_for_overview = :validated " +
         " where id = :reservationId")
     int updateTicketReservationWithValidation(@Bind("reservationId") String reservationId,
@@ -203,6 +204,7 @@ public interface TicketReservationRepository {
                                               @Bind("vatNr") String vatNr,
                                               @Bind("invoiceRequested") boolean invoiceRequested,
                                               @Bind("addCompanyBillingDetails") boolean addCompanyBillingDetails,
+                                              @Bind("customerReference") String customerReference,
                                               @Bind("validated") boolean validated);
 
 
@@ -212,4 +214,8 @@ public interface TicketReservationRepository {
 
     @Query("update tickets_reservation set validated_for_overview = :validated where id = :reservationId")
     int updateValidationStatus(@Bind("reservationId") String reservationId, @Bind("validated") boolean validated);
+
+    @Query("select count(b.id) from tickets_reservation a, ticket b where a.id = :reservationId and b.tickets_reservation_id = a.id" +
+        " and (:categories is null or b.category_id in (:categories))")
+    Integer countTicketsInReservationForCategories(@Bind("reservationId") String reservationId, @Bind("categories") Collection<Integer> categories);
 }

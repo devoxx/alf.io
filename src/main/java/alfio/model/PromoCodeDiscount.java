@@ -16,16 +16,20 @@
  */
 package alfio.model;
 
+import alfio.util.Json;
+import alfio.util.MonetaryUtil;
+import ch.digitalfondue.npjt.ConstructorAnnotationRowMapper.Column;
+import com.google.gson.reflect.TypeToken;
+import lombok.Getter;
+import org.apache.commons.collections.CollectionUtils;
+
 import java.math.BigDecimal;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.*;
-
-import alfio.util.Json;
-import ch.digitalfondue.npjt.ConstructorAnnotationRowMapper.Column;
-import alfio.util.MonetaryUtil;
-import com.google.gson.reflect.TypeToken;
-import lombok.Getter;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 @Getter
 public class PromoCodeDiscount {
@@ -43,6 +47,7 @@ public class PromoCodeDiscount {
     private final int discountAmount;
     private final DiscountType discountType;
     private final Set<Integer> categories;
+    private final Integer maxUsage;
     
     public PromoCodeDiscount(@Column("id")int id, 
             @Column("promo_code") String promoCode, 
@@ -52,7 +57,8 @@ public class PromoCodeDiscount {
             @Column("valid_to") ZonedDateTime utcEnd, 
             @Column("discount_amount") int discountAmount,
             @Column("discount_type") DiscountType discountType,
-            @Column("categories") String categories) {
+            @Column("categories") String categories,
+            @Column("max_usage") Integer maxUsage) {
         this.id = id;
         this.promoCode = promoCode;
         this.eventId = eventId;
@@ -61,8 +67,9 @@ public class PromoCodeDiscount {
         this.utcEnd = utcEnd;
         this.discountAmount = discountAmount;
         this.discountType = discountType;
+        this.maxUsage = maxUsage;
         if(categories != null) {
-            List<Integer> categoriesId = Json.GSON.<List<Integer>>fromJson(categories, new TypeToken<List<Integer>>(){}.getType());
+            List<Integer> categoriesId = Json.GSON.fromJson(categories, new TypeToken<List<Integer>>(){}.getType());
             this.categories = categoriesId == null ? Collections.emptySet() : new TreeSet<>(categoriesId);
         } else {
             this.categories = Collections.emptySet();
@@ -84,5 +91,10 @@ public class PromoCodeDiscount {
     
     public boolean getFixedAmount() {
         return DiscountType.FIXED_AMOUNT == discountType;
+    }
+
+    public static Set<Integer> categoriesOrNull(PromoCodeDiscount code) {
+        Set<Integer> categories = code.getCategories();
+        return CollectionUtils.isEmpty(categories) ? null : categories;
     }
 }

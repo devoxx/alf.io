@@ -78,6 +78,7 @@ import java.util.stream.Stream;
 import static alfio.model.Audit.EntityType.RESERVATION;
 import static alfio.model.BillingDocument.Type.INVOICE;
 import static alfio.model.BillingDocument.Type.RECEIPT;
+import static alfio.model.PromoCodeDiscount.categoriesOrNull;
 import static alfio.model.TicketReservation.TicketReservationStatus.IN_PAYMENT;
 import static alfio.model.TicketReservation.TicketReservationStatus.OFFLINE_PAYMENT;
 import static alfio.model.system.Configuration.getSystemConfiguration;
@@ -117,6 +118,7 @@ public class TicketReservationManager {
     private final MessageSource messageSource;
     private final TemplateManager templateManager;
     private final TransactionTemplate requiresNewTransactionTemplate;
+    private final TransactionTemplate serializedTransactionTemplate;
     private final WaitingQueueManager waitingQueueManager;
     private final TicketFieldRepository ticketFieldRepository;
     private final AdditionalServiceRepository additionalServiceRepository;
@@ -137,6 +139,10 @@ public class TicketReservationManager {
     }
 
     public static class InvalidSpecialPriceTokenException extends RuntimeException {
+
+    }
+
+    public static class TooManyTicketsForDiscountCodeException extends RuntimeException {
 
     }
 
@@ -187,6 +193,9 @@ public class TicketReservationManager {
         this.templateManager = templateManager;
         this.waitingQueueManager = waitingQueueManager;
         this.requiresNewTransactionTemplate = new TransactionTemplate(transactionManager, new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        DefaultTransactionDefinition serialized = new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        serialized.setIsolationLevel(TransactionDefinition.ISOLATION_SERIALIZABLE);
+        this.serializedTransactionTemplate = new TransactionTemplate(transactionManager, serialized);
         this.ticketFieldRepository = ticketFieldRepository;
         this.additionalServiceRepository = additionalServiceRepository;
         this.additionalServiceItemRepository = additionalServiceItemRepository;
@@ -242,6 +251,10 @@ public class TicketReservationManager {
 
         additionalServices.forEach(as -> reserveAdditionalServicesForReservation(event.getId(), reservationId, as, discount.orElse(null)));
         auditingRepository.insert(reservationId, null, event.getId(), Audit.EventType.RESERVATION_CREATE, new Date(), Audit.EntityType.RESERVATION, reservationId);
+        //validate discount code
+        if(isDiscountCodeUsageExceeded(reservationId)) {
+            throw new TooManyTicketsForDiscountCodeException();
+        }
         return reservationId;
     }
 
@@ -354,6 +367,9 @@ public class TicketReservationManager {
         try {
             PaymentResult paymentResult;
             ticketReservationRepository.lockReservationForUpdate(reservationId);
+            if(isDiscountCodeUsageExceeded(reservationId)) {
+                return PaymentResult.unsuccessful(ErrorsCode.STEP_2_DISCOUNT_CODE_USAGE_EXCEEDED);
+            }
             if(reservationCost.getPriceWithVAT() > 0) {
                 if(invoiceRequested && configurationManager.hasAllConfigurationsForInvoice(event)) {
                     int invoiceSequence = invoiceSequencesRepository.lockReservationForUpdate(event.getOrganizationId());
@@ -410,6 +426,20 @@ public class TicketReservationManager {
             return PaymentResult.unsuccessful("error.STEP2_STRIPE_unexpected");
         }
 
+    }
+
+    private boolean isDiscountCodeUsageExceeded(String reservationId) {
+        TicketReservation reservation = ticketReservationRepository.findReservationById(reservationId);
+        if(reservation.getPromoCodeDiscountId() != null) {
+            final PromoCodeDiscount promoCode = promoCodeDiscountRepository.findById(reservation.getPromoCodeDiscountId());
+            if(promoCode.getMaxUsage() == null) {
+                return false;
+            }
+            int currentTickets = ticketReservationRepository.countTicketsInReservationForCategories(reservationId, categoriesOrNull(promoCode));
+            return serializedTransactionTemplate.execute(status ->
+                promoCode.getMaxUsage() < currentTickets + promoCodeDiscountRepository.countConfirmedPromoCode(promoCode.getId(), categoriesOrNull(promoCode), reservationId, categoriesOrNull(promoCode) != null ? "X" : null));
+        }
+        return false;
     }
 
     private PaymentProxy evaluatePaymentProxy(Optional<PaymentProxy> method, TotalPrice reservationCost) {
@@ -530,10 +560,10 @@ public class TicketReservationManager {
         }
         Map<String, Object> emailModel = prepareModelForReservationEmail(event, reservation);
         Locale reservationLanguage = findReservationLanguage(reservationId);
-        String subject = messageSource.getMessage("reservation-email-expired-subject", new Object[]{reservation.getInvoiceNumber(), event.getDisplayName()}, reservationLanguage);
+        String subject = messageSource.getMessage(credit ? "credit-note-issued-email-subject" : "reservation-email-expired-subject", new Object[]{reservation.getInvoiceNumber(), event.getDisplayName()}, reservationLanguage);
         cancelReservation(reservationId, expired, credit, username);
         notificationManager.sendSimpleEmail(event, reservation.getEmail(), subject,
-            () ->  templateManager.renderTemplate(event, TemplateResource.OFFLINE_RESERVATION_EXPIRED_EMAIL, emailModel, reservationLanguage)
+            () ->  templateManager.renderTemplate(event, credit ? TemplateResource.CREDIT_NOTE_ISSUED_EMAIL : TemplateResource.OFFLINE_RESERVATION_EXPIRED_EMAIL, emailModel, reservationLanguage)
         );
     }
 
@@ -715,9 +745,9 @@ public class TicketReservationManager {
             acquireItems(ticketStatus, asStatus, paymentProxy, reservationId, email, customerName, userLanguage.getLanguage(), billingAddress, customerReference, eventId);
             final TicketReservation reservation = ticketReservationRepository.findReservationById(reservationId);
             extensionManager.handleReservationConfirmation(reservation, eventId);
-            //cleanup unused special price codes...
-            specialPriceSessionId.ifPresent(specialPriceRepository::unbindFromSession);
         }
+        //cleanup unused special price codes...
+        specialPriceSessionId.ifPresent(specialPriceRepository::unbindFromSession);
 
         Date timestamp = new Date();
         auditingRepository.insert(reservationId, null, eventId, Audit.EventType.RESERVATION_COMPLETE, timestamp, Audit.EntityType.RESERVATION, reservationId);
@@ -802,7 +832,9 @@ public class TicketReservationManager {
             .collect(Collectors.groupingBy(ReservationIdAndEventId::getEventId));
         reservationIdsByEvent.forEach((eventId, reservations) -> {
             Event event = eventRepository.findById(eventId);
-            extensionManager.handleReservationsExpiredForEvent(event, reservations.stream().map(ReservationIdAndEventId::getId).collect(Collectors.toList()));
+            List<String> reservationIds = reservations.stream().map(ReservationIdAndEventId::getId).collect(Collectors.toList());
+            extensionManager.handleReservationsExpiredForEvent(event, reservationIds);
+            billingDocumentRepository.deleteForReservations(reservationIds, eventId);
         });
         //
         ticketReservationRepository.remove(expiredReservationIds);
@@ -1508,7 +1540,7 @@ public class TicketReservationManager {
 
     public void updateReservation(String reservationId, CustomerName customerName, String email,
                                   String billingAddressCompany, String billingAddressLine1, String billingAddressLine2,
-                                  String billingAddressZip, String billingAddressCity, String vatCountryCode,
+                                  String billingAddressZip, String billingAddressCity, String vatCountryCode, String customerReference,
                                   String vatNr,
                                   boolean isInvoiceRequested,
                                   boolean addCompanyBillingDetails,
@@ -1524,6 +1556,6 @@ public class TicketReservationManager {
         ticketReservationRepository.updateTicketReservationWithValidation(reservationId,
             customerName.getFullName(), customerName.getFirstName(), customerName.getLastName(),
             email, billingAddressCompany, billingAddressLine1, billingAddressLine2, billingAddressZip,
-            billingAddressCity, completeBillingAddress, vatCountryCode, vatNr, isInvoiceRequested, addCompanyBillingDetails, validated);
+            billingAddressCity, completeBillingAddress, vatCountryCode, vatNr, isInvoiceRequested, addCompanyBillingDetails, customerReference, validated);
     }
 }

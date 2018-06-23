@@ -291,10 +291,11 @@ public class ReservationController {
         ticketReservationRepository.resetVat(reservationId);
         //
 
+
         ticketReservationManager.updateReservation(reservationId, customerName, paymentForm.getEmail(),
             paymentForm.getBillingAddressCompany(), paymentForm.getBillingAddressLine1(), paymentForm.getBillingAddressLine2(),
-            paymentForm.getBillingAddressZip(), paymentForm.getBillingAddressCity(), paymentForm.getVatCountryCode(),
-            paymentForm.getVatNr(), paymentForm.isInvoiceRequested(), paymentForm.isAddCompanyBillingDetails(), true);
+            paymentForm.getBillingAddressZip(), paymentForm.getBillingAddressCity(), paymentForm.getVatCountryCode(), paymentForm.getCustomerReference(),
+            paymentForm.getVatNr(), paymentForm.isInvoiceRequested(), paymentForm.isAddCompanyBillingDetails(), false);
 
 
         assignTickets(event.getShortName(), reservationId, paymentForm, bindingResult, request, true);
@@ -342,10 +343,10 @@ public class ReservationController {
         paymentForm.validate(bindingResult, event, ticketFieldRepository.findAdditionalFieldsForEvent(event.getId()), companyVatChecked);
 
         if(bindingResult.hasErrors()) {
-            ticketReservationRepository.updateValidationStatus(reservationId, false);
             SessionUtil.addToFlash(bindingResult, redirectAttributes);
             return "redirect:/event/" + eventName + "/reservation/" + reservationId + "/book";
         }
+        ticketReservationRepository.updateValidationStatus(reservationId, true);
 
         //
         return "redirect:/event/" + eventName + "/reservation/" + reservationId + "/overview";
@@ -360,7 +361,7 @@ public class ReservationController {
     }
 
     @RequestMapping(value = "/event/{eventName}/reservation/{reservationId}/overview", method = RequestMethod.GET)
-    public String showOverview(@PathVariable("eventName") String eventName, @PathVariable("reservationId") String reservationId, Locale locale, Model model) {
+    public String showOverview(@PathVariable("eventName") String eventName, @PathVariable("reservationId") String reservationId, Model model, Locale locale) {
         return eventRepository.findOptionalByShortName(eventName)
             .map(event -> ticketReservationManager.findById(reservationId)
                 .map(reservation -> {
@@ -527,7 +528,8 @@ public class ReservationController {
 
         switch(reservation.getStatus()) {
             case PENDING:
-                return baseUrl + "/book";
+                TicketReservationAdditionalInfo additionalInfo = ticketReservationRepository.getAdditionalInfo(reservationId);
+                return additionalInfo.hasBeenValidated() ? baseUrl + "/overview" : baseUrl + "/book";
             case COMPLETE:
                 return baseUrl + "/success";
             case OFFLINE_PAYMENT:
@@ -652,9 +654,12 @@ public class ReservationController {
             ticketReservation.getVatNr(), ticketReservation.getVatStatus(), paymentForm.getTermAndConditionsAccepted(), Optional.ofNullable(paymentForm.getPrivacyPolicyAccepted()).orElse(false));
 
         if(!status.isSuccessful()) {
-            String errorMessageCode = status.getErrorCode().get();
-            MessageSourceResolvable message = new DefaultMessageSourceResolvable(new String[]{errorMessageCode, StripeManager.STRIPE_UNEXPECTED});
-            bindingResult.reject(ErrorsCode.STEP_2_PAYMENT_PROCESSING_ERROR, new Object[]{messageSource.getMessage(message, locale)}, null);
+            if(status.getErrorCode().isPresent()) {
+                bindingResult.reject(status.getErrorCode().get());
+            } else {
+                MessageSourceResolvable message = new DefaultMessageSourceResolvable(new String[]{StripeManager.STRIPE_UNEXPECTED});
+                bindingResult.reject(ErrorsCode.STEP_2_PAYMENT_PROCESSING_ERROR, new Object[]{messageSource.getMessage(message, locale)}, null);
+            }
             SessionUtil.addToFlash(bindingResult, redirectAttributes);
             return redirectReservation(Optional.of(ticketReservation), eventName, reservationId);
         }
