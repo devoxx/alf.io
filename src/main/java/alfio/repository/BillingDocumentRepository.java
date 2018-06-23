@@ -42,4 +42,7 @@ public interface BillingDocumentRepository {
 
     @Query("delete from billing_document where reservation_id_fk = :reservationId and event_id_fk = :eventId")
     int deleteForReservation(@Bind("reservationId") String reservationId, @Bind("eventId") int eventId);
+
+    @Query("delete from billing_document where reservation_id_fk in (:reservationIds) and event_id_fk = :eventId")
+    int deleteForReservations(@Bind("reservationIds") List<String> reservationIds, @Bind("eventId") int eventId);
 }

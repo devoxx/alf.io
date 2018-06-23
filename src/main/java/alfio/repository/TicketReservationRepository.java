@@ -214,4 +214,8 @@ public interface TicketReservationRepository {
 
     @Query("update tickets_reservation set validated_for_overview = :validated where id = :reservationId")
     int updateValidationStatus(@Bind("reservationId") String reservationId, @Bind("validated") boolean validated);
+
+    @Query("select count(b.id) from tickets_reservation a, ticket b where a.id = :reservationId and b.tickets_reservation_id = a.id" +
+        " and (:categories is null or b.category_id in (:categories))")
+    Integer countTicketsInReservationForCategories(@Bind("reservationId") String reservationId, @Bind("categories") Collection<Integer> categories);
 }

@@ -43,6 +43,7 @@ import ch.digitalfondue.npjt.AffectedRowCountAndKey;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -55,7 +56,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.time.ZoneId;
@@ -216,7 +216,7 @@ public class EventManager {
     }
 
     private void createAdditionalFields(Event event, EventModification em) {
-        if (!CollectionUtils.isEmpty(em.getTicketFields())) {
+        if (CollectionUtils.isNotEmpty(em.getTicketFields())) {
             em.getTicketFields().forEach(f -> {
                 insertAdditionalField(event, f, f.getOrder());
             });
@@ -747,9 +747,21 @@ public class EventManager {
         return true;
     }
 
-    public void addPromoCode(String promoCode, Integer eventId, Integer organizationId, ZonedDateTime start, ZonedDateTime end, int discountAmount, DiscountType discountType, List<Integer> categoriesId) {
+    public void addPromoCode(String promoCode,
+                             Integer eventId,
+                             Integer organizationId,
+                             ZonedDateTime start,
+                             ZonedDateTime end,
+                             int discountAmount,
+                             DiscountType discountType,
+                             List<Integer> categoriesId,
+                             Integer maxUsage) {
+
         Validate.isTrue(promoCode.length() >= 7, "min length is 7 chars");
         Validate.isTrue((eventId != null && organizationId == null) || (eventId == null && organizationId != null), "eventId or organizationId must be not null");
+        if(maxUsage != null) {
+            Validate.isTrue(maxUsage > 0, "Invalid max usage");
+        }
         if(DiscountType.PERCENTAGE == discountType) {
             Validate.inclusiveBetween(0, 100, discountAmount, "percentage discount must be between 0 and 100");
         }
@@ -761,15 +773,16 @@ public class EventManager {
         categoriesId = Optional.ofNullable(categoriesId).orElse(Collections.emptyList()).stream().filter(Objects::nonNull).collect(toList());
         //
 
-        promoCodeRepository.addPromoCode(promoCode, eventId, organizationId, start, end, discountAmount, discountType.toString(), Json.GSON.toJson(categoriesId));
+        promoCodeRepository.addPromoCode(promoCode, eventId, organizationId, start, end, discountAmount, discountType.toString(), Json.GSON.toJson(categoriesId), maxUsage);
     }
     
     public void deletePromoCode(int promoCodeId) {
         promoCodeRepository.deletePromoCode(promoCodeId);
     }
 
-    public void updatePromoCode(int promoCodeId, ZonedDateTime start, ZonedDateTime end) {
-        promoCodeRepository.updateEventPromoCode(promoCodeId, start, end);
+    public void updatePromoCode(int promoCodeId, ZonedDateTime start, ZonedDateTime end, Integer maxUsage, List<Integer> categories) {
+        String categoriesJson = CollectionUtils.isEmpty(categories) ? null : Json.toJson(categories);
+        promoCodeRepository.updateEventPromoCode(promoCodeId, start, end, maxUsage, categoriesJson);
     }
     
     public List<PromoCodeDiscountWithFormattedTime> findPromoCodesInEvent(int eventId) {
