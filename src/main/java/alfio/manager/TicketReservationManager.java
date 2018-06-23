@@ -1057,13 +1057,13 @@ public class TicketReservationManager {
         List<String> wrappedReservationIdToRemove = Collections.singletonList(reservationIdToRemove);
         waitingQueueManager.cleanExpiredReservations(wrappedReservationIdToRemove);
         //
+        boolean deleteReservation = false;
         if(!credit) {
             int result = billingDocumentRepository.deleteForReservation(reservationIdToRemove, event.getId());
             if(result > 0) {
                 log.warn("deleted {} documents for reservation id {}", result, reservationIdToRemove);
             }
-            int removedReservation = ticketReservationRepository.remove(wrappedReservationIdToRemove);
-            Validate.isTrue(removedReservation == 1, "expected exactly one removed reservation, got " + removedReservation);
+            deleteReservation = true;
         } else {
             issueCreditNoteForReservation(event, reservationIdToRemove, username);
         }
@@ -1074,6 +1074,11 @@ public class TicketReservationManager {
             extensionManager.handleReservationsCancelledForEvent(event, wrappedReservationIdToRemove);
         } else {
             extensionManager.handleReservationsCreditNoteIssuedForEvent(event, wrappedReservationIdToRemove);
+        }
+
+        if(deleteReservation) {
+            int removedReservation = ticketReservationRepository.remove(wrappedReservationIdToRemove);
+            Validate.isTrue(removedReservation == 1, "expected exactly one removed reservation, got " + removedReservation);
         }
 
         //
@@ -1503,7 +1508,7 @@ public class TicketReservationManager {
 
     public void updateReservation(String reservationId, CustomerName customerName, String email,
                                   String billingAddressCompany, String billingAddressLine1, String billingAddressLine2,
-                                  String billingAddressZip, String billingAddressCity, String vatCountryCode,
+                                  String billingAddressZip, String billingAddressCity, String vatCountryCode, String customerReference,
                                   String vatNr,
                                   boolean isInvoiceRequested,
                                   boolean addCompanyBillingDetails,
@@ -1519,6 +1524,6 @@ public class TicketReservationManager {
         ticketReservationRepository.updateTicketReservationWithValidation(reservationId,
             customerName.getFullName(), customerName.getFirstName(), customerName.getLastName(),
             email, billingAddressCompany, billingAddressLine1, billingAddressLine2, billingAddressZip,
-            billingAddressCity, completeBillingAddress, vatCountryCode, vatNr, isInvoiceRequested, addCompanyBillingDetails, validated);
+            billingAddressCity, completeBillingAddress, vatCountryCode, vatNr, isInvoiceRequested, addCompanyBillingDetails, customerReference, validated);
     }
 }

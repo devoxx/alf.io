@@ -291,10 +291,11 @@ public class ReservationController {
         ticketReservationRepository.resetVat(reservationId);
         //
 
+
         ticketReservationManager.updateReservation(reservationId, customerName, paymentForm.getEmail(),
             paymentForm.getBillingAddressCompany(), paymentForm.getBillingAddressLine1(), paymentForm.getBillingAddressLine2(),
-            paymentForm.getBillingAddressZip(), paymentForm.getBillingAddressCity(), paymentForm.getVatCountryCode(),
-            paymentForm.getVatNr(), paymentForm.isInvoiceRequested(), paymentForm.isAddCompanyBillingDetails(), true);
+            paymentForm.getBillingAddressZip(), paymentForm.getBillingAddressCity(), paymentForm.getVatCountryCode(), paymentForm.getCustomerReference(),
+            paymentForm.getVatNr(), paymentForm.isInvoiceRequested(), paymentForm.isAddCompanyBillingDetails(), false);
 
 
         assignTickets(event.getShortName(), reservationId, paymentForm, bindingResult, request, true);
@@ -342,10 +343,10 @@ public class ReservationController {
         paymentForm.validate(bindingResult, event, ticketFieldRepository.findAdditionalFieldsForEvent(event.getId()), companyVatChecked);
 
         if(bindingResult.hasErrors()) {
-            ticketReservationRepository.updateValidationStatus(reservationId, false);
             SessionUtil.addToFlash(bindingResult, redirectAttributes);
             return "redirect:/event/" + eventName + "/reservation/" + reservationId + "/book";
         }
+        ticketReservationRepository.updateValidationStatus(reservationId, true);
 
         //
         return "redirect:/event/" + eventName + "/reservation/" + reservationId + "/overview";

@@ -186,6 +186,7 @@ public interface TicketReservationRepository {
         " billing_address_zip = :billingAddressZip, " +
         " billing_address_city = :billingAddressCity, " +
         " add_company_billing_details = :addCompanyBillingDetails, " +
+        " customer_reference = :customerReference, "+
         " validated_for_overview = :validated " +
         " where id = :reservationId")
     int updateTicketReservationWithValidation(@Bind("reservationId") String reservationId,
@@ -203,6 +204,7 @@ public interface TicketReservationRepository {
                                               @Bind("vatNr") String vatNr,
                                               @Bind("invoiceRequested") boolean invoiceRequested,
                                               @Bind("addCompanyBillingDetails") boolean addCompanyBillingDetails,
+                                              @Bind("customerReference") String customerReference,
                                               @Bind("validated") boolean validated);
 
 
