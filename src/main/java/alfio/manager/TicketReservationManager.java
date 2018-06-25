@@ -768,7 +768,7 @@ public class TicketReservationManager {
         int updatedTickets = ticketRepository.updateTicketsStatusWithReservationId(reservationId, ticketStatus.toString());
         //automatically lock assignment
         int locked = ticketRepository.toggleTicketsLocking(preUpdateTicket.keySet(), true);
-        Validate.isTrue(updatedTickets == locked, "Expected to lock {} tickets, locked {}", updatedTickets, locked);
+        Validate.isTrue(updatedTickets == locked, "Expected to lock "+updatedTickets+" tickets, locked "+ locked);
         Map<Integer, Ticket> postUpdateTicket = ticketRepository.findTicketsInReservation(reservationId).stream().collect(toMap(Ticket::getId, Function.identity()));
 
         postUpdateTicket.forEach((id, ticket) -> {
