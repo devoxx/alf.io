@@ -123,10 +123,10 @@ public class EventController {
         return "/event/session-expired";
     }
 
-    @RequestMapping(value = "/event/{eventName}/promoCode/{promoCode}", method = RequestMethod.POST)
+    @RequestMapping(value = "/event/{eventName}/promoCode/", method = RequestMethod.POST)
     @ResponseBody
     public ValidationResult savePromoCode(@PathVariable("eventName") String eventName,
-                                 @PathVariable("promoCode") String promoCode,
+                                 @RequestParam("promoCodes") String promoCode,
                                  Model model,
                                  HttpServletRequest request) {
         
@@ -171,7 +171,7 @@ public class EventController {
     }
 
     private boolean isDiscountCodeUsageExceeded(PromoCodeDiscount discount) {
-        return discount.getMaxUsage() != null && discount.getMaxUsage() >= promoCodeRepository.countConfirmedPromoCode(discount.getId(), categoriesOrNull(discount), null, categoriesOrNull(discount) != null ? "X" : null);
+        return discount.getMaxUsage() != null && discount.getMaxUsage() <= promoCodeRepository.countConfirmedPromoCode(discount.getId(), categoriesOrNull(discount), null, categoriesOrNull(discount) != null ? "X" : null);
     }
 
     @RequestMapping(value = "/event/{eventName}", method = {RequestMethod.GET, RequestMethod.HEAD})

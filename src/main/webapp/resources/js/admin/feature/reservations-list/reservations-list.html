@@ -68,7 +68,7 @@
                     </thead>
                     <tbody>
                     <tr ng-repeat="r in $ctrl.reservations">
-                        <td><a ui-sref="events.single.view-reservation({eventName : $ctrl.event.shortName,reservationId: r.id})" ng-bind="r.invoiceNumber"></a></td>
+                        <td><a ui-sref="events.single.view-reservation({eventName : $ctrl.event.shortName,reservationId: r.id})" ng-bind="r.invoiceNumber || 'N/A'"></a></td>
                         <td ng-bind="$ctrl.formatFullName(r)"></td>
                         <td ng-bind="r.email"></td>
                         <td ng-bind="r.paymentMethod"></td>
@@ -193,7 +193,7 @@
                     </thead>
                     <tbody>
                     <tr ng-repeat="r in $ctrl.cancelledReservations">
-                        <td><a ui-sref="events.single.view-reservation({eventName : $ctrl.event.shortName,reservationId: r.id})" ng-bind="r.invoiceNumber"></a></td>
+                        <td><a ui-sref="events.single.view-reservation({eventName : $ctrl.event.shortName,reservationId: r.id})" ng-bind="r.invoiceNumber || 'N/A'"></a></td>
                         <td ng-bind="$ctrl.formatFullName(r)"></td>
                         <td ng-bind="r.email"></td>
                         <td ng-bind="r.paymentMethod"></td>

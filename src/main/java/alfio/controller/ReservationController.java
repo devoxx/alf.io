@@ -25,6 +25,7 @@ import alfio.controller.support.TicketDecorator;
 import alfio.manager.*;
 import alfio.manager.support.PaymentResult;
 import alfio.manager.system.ConfigurationManager;
+import alfio.manager.system.Mailer;
 import alfio.model.*;
 import alfio.model.TicketReservation.TicketReservationStatus;
 import alfio.model.result.ValidationResult;
@@ -612,7 +613,7 @@ public class ReservationController {
         CustomerName customerName = new CustomerName(ticketReservation.getFullName(), ticketReservation.getFirstName(), ticketReservation.getLastName(), event);
 
         //handle paypal redirect!
-        boolean invoiceRequested = ticketReservation.isInvoiceRequested();
+        boolean invoiceRequested = reservationCost.getPriceWithVAT() > 0 && ticketReservation.isInvoiceRequested();
         if(paymentForm.getPaymentMethod() == PaymentProxy.PAYPAL && !paymentForm.hasPaypalTokens()) {
             OrderSummary orderSummary = ticketReservationManager.orderSummaryForReservationId(reservationId, event, locale);
             try {
@@ -744,9 +745,11 @@ public class ReservationController {
 
         Locale locale = RequestContextUtils.getLocale(request);
         Map<String, Object> model = ticketReservationManager.prepareModelForReservationEmail(event, reservation);
-        notificationManager.sendSimpleEmail(event, organization.getEmail(), cc, "Reservation complete " + reservation.getInvoiceNumber(), () ->
+        OrderSummary summary = ticketReservationManager.orderSummaryForReservationId(reservation.getId(), event, Locale.forLanguageTag(reservation.getUserLanguage()));
+        List<Mailer.Attachment> attachments = TicketReservationManager.mustGenerateBillingDocument(summary, reservation) ? TicketReservationManager.generateReceiptOrInvoice(event, reservation, locale, reservation.getId(), model) : Collections.emptyList();
+        notificationManager.sendSimpleEmail(event, organization.getEmail(), cc, "Reservation complete " + StringUtils.defaultString(reservation.getInvoiceNumber()), () ->
             templateManager.renderTemplate(event, TemplateResource.CONFIRMATION_EMAIL_FOR_ORGANIZER, model,
-                locale), TicketReservationManager.generateReceiptOrInvoice(event, reservation, locale, reservation.getId(), model)
+                locale), attachments
         );
     }
 
