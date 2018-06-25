@@ -67,9 +67,6 @@
                     {{#reservation.hasInvoiceNumber}}
                         <a class="btn btn-default" href="{{request.contextPath}}/event/{{event.shortName}}/reservation/{{reservationId}}/invoice" target="_blank"><i class="fa fa-download"></i> {{#i18n}}reservation-page-complete.download-your-invoice{{/i18n}}</a>
                     {{/reservation.hasInvoiceNumber}}
-                    {{^reservation.hasInvoiceNumber}}
-                        <a class="btn btn-default" href="{{request.contextPath}}/event/{{event.shortName}}/reservation/{{reservationId}}/receipt" target="_blank"><i class="fa fa-download"></i> {{#i18n}}reservation-page-complete.download-your-receipt{{/i18n}}</a>
-                    {{/reservation.hasInvoiceNumber}}
                 {{/reservation.hasInvoiceOrReceiptDocument}}
             {{/reservation.hasBeenPaid}}
             <input type="hidden" name="{{_csrf.parameterName}}" value="{{_csrf.token}}">

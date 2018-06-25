@@ -527,11 +527,11 @@ public class TicketReservationManager {
         }
 
         notificationManager.sendSimpleEmail(event, ticketReservation.getEmail(), messageSource.getMessage("reservation-email-subject",
-                new Object[]{ticketReservation.getInvoiceNumber(), event.getDisplayName()}, language),
+                new Object[]{StringUtils.defaultString(ticketReservation.getInvoiceNumber()), event.getDisplayName()}, language),
             () -> templateManager.renderTemplate(event, TemplateResource.CONFIRMATION_EMAIL, reservationEmailModel, language), attachments);
     }
 
-    static boolean mustGenerateBillingDocument(OrderSummary summary, TicketReservation ticketReservation) {
+    public static boolean mustGenerateBillingDocument(OrderSummary summary, TicketReservation ticketReservation) {
         return !summary.getFree() && (!summary.getNotYetPaid() || (summary.getWaitingForPayment() && ticketReservation.isInvoiceRequested()));
     }
 
