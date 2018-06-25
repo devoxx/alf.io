@@ -45,6 +45,15 @@
     <div class="page-header">
         <h2>{{#i18n}}reservation-page.your-details{{/i18n}}</h2>
     </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="form-group {{#field-has-error}}[billingAddressCompany] has-error{{/field-has-error}}">
+                    <label for="billingAddressCompany">{{#i18n}}reservation-page-complete.company{{/i18n}}</label>
+                    <input id="billingAddressCompany" name="billingAddressCompany" class="form-control" type="text" value="{{paymentForm.billingAddressCompany}}" maxlength="255" placeholder="if applicable">
+                    {{#field-has-error}}[billingAddressCompany]<span class="help-block text-danger">{{#i18n}}{{#field-error}}billingAddressCompany{{/field-error}}{{/i18n}}</span>{{/field-has-error}}
+                </div>
+            </div>
+        </div>
         {{#useFirstAndLastName}}
         <div class="row">
             <div class="col-xs-12 col-sm-6">
@@ -82,15 +91,6 @@
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-xs-12">
-                <div class="form-group {{#field-has-error}}[billingAddressCompany] has-error{{/field-has-error}}">
-                    <label for="billingAddressCompany">{{#i18n}}reservation-page-complete.company{{/i18n}}</label>
-                    <input id="billingAddressCompany" name="billingAddressCompany" class="form-control" type="text" value="{{paymentForm.billingAddressCompany}}" maxlength="255">
-                    {{#field-has-error}}[billingAddressCompany]<span class="help-block text-danger">{{#i18n}}{{#field-error}}billingAddressCompany{{/field-error}}{{/i18n}}</span>{{/field-has-error}}
-                </div>
-            </div>
-        </div>
         <div class="row">
             <div class="col-xs-12">
                 <div class="form-group {{#field-has-error}}[billingAddressLine1] has-error{{/field-has-error}}">
