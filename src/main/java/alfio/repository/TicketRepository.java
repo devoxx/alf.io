@@ -21,10 +21,7 @@ import alfio.model.Ticket;
 import alfio.model.TicketCSVInfo;
 import ch.digitalfondue.npjt.*;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @QueryRepository
 public interface TicketRepository {
@@ -145,6 +142,9 @@ public interface TicketRepository {
 
     @Query("update ticket set locked_assignment = :lockedAssignment where id = :id and category_id = :categoryId")
     int toggleTicketLocking(@Bind("id") int ticketId, @Bind("categoryId") int categoryId, @Bind("lockedAssignment") boolean locked);
+
+    @Query("update ticket set locked_assignment = :lockedAssignment where id in(:ids)")
+    int toggleTicketsLocking(@Bind("ids") Collection<Integer> ticketIds, @Bind("lockedAssignment") boolean locked);
 
     @Query("update ticket set ext_reference = :extReference, locked_assignment = :lockedAssignment where id = :id and category_id = :categoryId")
     int updateExternalReferenceAndLocking(@Bind("id") int ticketId, @Bind("categoryId") int categoryId, @Bind("extReference") String extReference, @Bind("lockedAssignment") boolean locked);
