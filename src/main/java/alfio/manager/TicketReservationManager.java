@@ -854,8 +854,6 @@ public class TicketReservationManager {
                 boolean enabled = configurationManager.getBooleanConfigValue(Configuration.from(event.getOrganizationId(), event.getId(), AUTOMATIC_REMOVAL_EXPIRED_OFFLINE_PAYMENT), true);
                 if(enabled) {
                     deleteOfflinePayment(event, reservationId, true, false, null);
-                } else {
-                    log.debug("Will not cleanup reservation with id {} because the automatic removal has been disabled", reservationId);
                 }
                 return null;
             });
