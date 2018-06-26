@@ -94,7 +94,7 @@ public final class TemplateProcessor {
         };
     }
 
-    public static PdfBoxRenderer prepareItextRenderer(String page) {
+    public static PDFTemplateGenerator.ClosingRenderer prepareItextRenderer(String page) {
 
         PdfRendererBuilder builder = new PdfRendererBuilder();
 
@@ -107,7 +107,7 @@ public final class TemplateProcessor {
             log.warn("error while loading DejaVuSansMono.ttf font", e);
         }
         renderer.layout();
-        return renderer;
+        return new PDFTemplateGenerator.ClosingRenderer(renderer);
     }
 
     public static Optional<TemplateResource.ImageData> extractImageModel(Event event, FileUploadManager fileUploadManager) {
