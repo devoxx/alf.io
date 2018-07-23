@@ -34,6 +34,7 @@
         ctrl.refundInProgress = false;
 
         ctrl.displayCreationWarning = angular.isDefined($stateParams.fromCreation) && $stateParams.fromCreation;
+        ctrl.regenerateBillingDocument = regenerateBillingDocument;
 
         ctrl.hideCreationWarning = function() {
             ctrl.displayCreationWarning = false;
@@ -94,6 +95,17 @@
             loadPaymentInfo();
             loadAudit();
         };
+
+        function regenerateBillingDocument() {
+            var eventName = ctrl.event.shortName;
+            var reservation = ctrl.reservationDescriptor.reservation;
+            var reservationId = reservation.id;
+            var doc = reservation.hasInvoiceNumber ? 'invoice' : 'receipt';
+            AdminReservationService.regenerateBillingDocument(eventName, reservationId).then(function(res) {
+                NotificationHandler.showSuccess(_.capitalize(doc) + ' regeneration succeeded');
+                $window.open('../event/'+eventName+'/reservation/'+reservationId+'/'+doc);
+            });
+        }
 
         function loadAudit() {
             if(ctrl.event.visibleForCurrentUser) {

@@ -30,6 +30,9 @@
                 },
                 getAudit: function(eventName, reservationId) {
                     return $http.get('/admin/api/reservation/event/'+eventName+'/'+reservationId+'/audit').error(HttpErrorHandler.handle);
+                },
+                regenerateBillingDocument: function(eventName, reservationId) {
+                    return $http.put('/admin/api/reservation/event/'+eventName+'/'+reservationId+'/regenerate-billing-document', {}).error(HttpErrorHandler.handle);
                 }
             }
         }]).service('AdminImportService', ['$http', 'HttpErrorHandler', function($http, HttpErrorHandler) {

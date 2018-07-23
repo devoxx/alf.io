@@ -216,8 +216,6 @@ public class AdminReservationManager {
             if(StringUtils.isNotBlank(customerData.getVatNr()) || StringUtils.isNotBlank(customerData.getVatCountryCode())) {
                 ticketReservationRepository.updateBillingData(r.getVatStatus(), customerData.getVatNr(), customerData.getVatCountryCode(), r.isInvoiceRequested(), reservationId);
             }
-
-            ticketReservationManager.createBillingDocumentModel(event, ticketReservationRepository.findReservationById(reservationId), username);
         }
         arm.getTicketsInfo().stream()
             .filter(TicketsInfo::isUpdateAttendees)
@@ -565,6 +563,14 @@ public class AdminReservationManager {
         });
     }
 
+    @Transactional
+    public Result<Boolean> regenerateBillingDocument(String eventName, String reservationId, String username) {
+        return loadReservation(eventName, reservationId, username).map(res -> {
+            ticketReservationManager.createBillingDocumentModel(res.getRight(), res.getLeft(), username);
+            return true;
+        });
+    }
+
     private void removeTicketsFromReservation(TicketReservation reservation, Event event, List<Integer> ticketIds, boolean notify, String username, boolean removeReservation, boolean forceInvoiceReceiptUpdate) {
         String reservationId = reservation.getId();
         if(notify && !ticketIds.isEmpty()) {
@@ -634,4 +640,5 @@ public class AdminReservationManager {
         }
         //
     }
+
 }

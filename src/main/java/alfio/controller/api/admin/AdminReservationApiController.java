@@ -151,6 +151,11 @@ public class AdminReservationApiController {
         return adminReservationManager.refund(eventName, reservationId, new BigDecimal(amount.amount), principal.getName());
     }
 
+    @PutMapping("/event/{eventName}/{reservationId}/regenerate-billing-document")
+    public Result<Boolean> regenerateBillingDocument(@PathVariable("eventName") String eventName, @PathVariable("reservationId") String reservationId, Principal principal) {
+        return adminReservationManager.regenerateBillingDocument(eventName, reservationId, principal.getName());
+    }
+
     private TicketReservationDescriptor toReservationDescriptor(String reservationId, Triple<TicketReservation, List<Ticket>, Event> triple) {
         List<SerializablePair<TicketCategory, List<Ticket>>> tickets = triple.getMiddle().stream().collect(Collectors.groupingBy(Ticket::getCategoryId)).entrySet().stream()
             .map(entry -> SerializablePair.of(eventManager.getTicketCategoryById(entry.getKey(), triple.getRight().getId()), entry.getValue()))
