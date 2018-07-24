@@ -48,6 +48,8 @@ public class PromoCodeDiscount {
     private final DiscountType discountType;
     private final Set<Integer> categories;
     private final Integer maxUsage;
+    private final String description;
+    private final String emailReference;
     
     public PromoCodeDiscount(@Column("id")int id, 
             @Column("promo_code") String promoCode, 
@@ -58,7 +60,9 @@ public class PromoCodeDiscount {
             @Column("discount_amount") int discountAmount,
             @Column("discount_type") DiscountType discountType,
             @Column("categories") String categories,
-            @Column("max_usage") Integer maxUsage) {
+            @Column("max_usage") Integer maxUsage,
+            @Column("description") String description,
+            @Column("email_reference") String emailReference) {
         this.id = id;
         this.promoCode = promoCode;
         this.eventId = eventId;
@@ -74,6 +78,8 @@ public class PromoCodeDiscount {
         } else {
             this.categories = Collections.emptySet();
         }
+        this.description = description;
+        this.emailReference = emailReference;
     }
     
     public boolean isCurrentlyValid(ZoneId eventZoneId, ZonedDateTime now) {

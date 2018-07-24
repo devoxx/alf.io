@@ -42,6 +42,8 @@ public class PromoCodeDiscountModification {
     private final List<Integer> categories;
     private final Integer utcOffset;
     private final Integer maxUsage;
+    private final String description;
+    private final String emailReference;
 
     @JsonCreator
     public PromoCodeDiscountModification(
@@ -54,7 +56,9 @@ public class PromoCodeDiscountModification {
             @JsonProperty("discountType") DiscountType discountType,
             @JsonProperty("categories") List<Integer> categories,
             @JsonProperty("utcOffset") Integer utcOffset,
-            @JsonProperty("maxUsage") Integer maxUsage) {
+            @JsonProperty("maxUsage") Integer maxUsage,
+            @JsonProperty("description") String description,
+            @JsonProperty("emailReference") String emailReference) {
 
         this.organizationId = organizationId;
         this.eventId = eventId;
@@ -66,6 +70,8 @@ public class PromoCodeDiscountModification {
         this.categories = Optional.ofNullable(categories).map(l -> l.stream().filter(Objects::nonNull).collect(Collectors.toList())).orElse(Collections.emptyList());
         this.utcOffset = utcOffset;
         this.maxUsage = maxUsage;
+        this.description = description;
+        this.emailReference = emailReference;
     }
     
     public int getDiscountAsPercent() {
