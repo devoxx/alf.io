@@ -66,7 +66,7 @@
                 </div>
 
                 <div>
-                    <div ng-if="$ctrl.reservation.status !== 'PENDING'">
+                    <div ng-if="['PENDING', 'OFFLINE_PAYMENT'].indexOf($ctrl.reservation.status) === 0">
                         <div class="page-header">
                             <h3>Payment info</h3>
                         </div>
@@ -200,6 +200,31 @@
                                           ng-if="$ctrl.reservation.updateContactData" name="customerBillingAddress"
                                           ng-model="$ctrl.reservation.customerData.billingAddress">
                                 </textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div ng-if="['PENDING', 'OFFLINE_PAYMENT'].indexOf($ctrl.reservation.status) > -1">
+
+                        <div class="form-group">
+                            <div class="checkbox">
+                                <label><input type="checkbox" ng-model="$ctrl.reservation.updateAdvancedBillingOptions"> Edit advanced invoice data</label>
+                            </div>
+                        </div>
+                        <div class="panel panel-danger" uib-collapse="!$ctrl.reservation.updateAdvancedBillingOptions">
+                            <div class="panel-heading">
+                                <div class="panel-title">Danger zone!</div>
+                            </div>
+                            <div class="panel-body">
+                                <p class="text-danger">Please modify the following option with care, as they might affect the reservation total price and/or lead to inconsistencies.</p>
+                                <div class="row">
+                                    <div class="col-xs-12 col-sm-6">
+                                        <div class="form-group">
+                                            <label ng-if="$ctrl.reservation.advancedBillingOptions.vatApplied"><input type="checkbox" ng-model="$ctrl.reservation.advancedBillingOptions.vatApplied" ng-true-value="'Y'" ng-false-value="'N'"> Apply VAT/GST</label>
+                                            <label ng-if="!$ctrl.reservation.advancedBillingOptions.vatApplied">VAT/GST Application</label>
+                                            <div class="form-control-static" ng-if="!$ctrl.reservation.advancedBillingOptions.vatApplied">VAT/GST not applicable</div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

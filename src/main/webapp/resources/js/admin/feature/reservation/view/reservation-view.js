@@ -32,6 +32,15 @@
 
         ctrl.amountToRefund = null;
         ctrl.refundInProgress = false;
+        ctrl.vatStatusDescriptions = {
+           /*
+           'NONE': 'VAT/GST not supported',
+           'INCLUDED': 'Included in the sale price',
+           'NOT_INCLUDED': 'Not included in the sale price',
+           'INCLUDED_EXEMPT': 'VAT/GST voided',
+           'NOT_INCLUDED_EXEMPT': '
+            */
+        };
 
         ctrl.displayCreationWarning = angular.isDefined($stateParams.fromCreation) && $stateParams.fromCreation;
         ctrl.regenerateBillingDocument = regenerateBillingDocument;
@@ -47,6 +56,12 @@
             var src = ctrl.reservationDescriptor.reservation;
             var currentURL = $window.location.href;
             ctrl.reservationUrl = (currentURL.substring(0, currentURL.indexOf('/admin')) + '/event/'+ ctrl.event.shortName + '/reservation/' + src.id+'?lang='+src.userLanguage);
+            var vatApplied = null;
+            if(['INCLUDED', 'NOT_INCLUDED'].indexOf(src.vatStatus) > -1) {
+                vatApplied = 'Y';
+            } else if(['INCLUDED_EXEMPT', 'NOT_INCLUDED_EXEMPT'].indexOf(src.vatStatus) > -1) {
+                vatApplied = 'N';
+            }
             ctrl.reservation = {
                 id: src.id,
                 status: src.status,
@@ -66,6 +81,9 @@
                     vatCountryCode: src.vatCountryCode,
                     customerReference: src.customerReference,
                     invoiceRequested: src.invoiceRequested
+                },
+                advancedBillingOptions: {
+                    vatApplied: vatApplied
                 },
                 language: src.userLanguage
             };

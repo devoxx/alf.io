@@ -289,7 +289,7 @@ public class ReservationController {
         CustomerName customerName = new CustomerName(paymentForm.getFullName(), paymentForm.getFirstName(), paymentForm.getLastName(), event, false);
 
         //
-        ticketReservationRepository.resetVat(reservationId);
+        ticketReservationRepository.resetVat(reservationId, event.getVatStatus());
         //
 
 

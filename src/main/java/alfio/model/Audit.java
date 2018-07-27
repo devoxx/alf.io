@@ -51,7 +51,8 @@ public class Audit {
         TERMS_CONDITION_ACCEPTED,
         PRIVACY_POLICY_ACCEPTED,
         CREDIT_NOTE_ISSUED,
-        BILLING_DOCUMENT_GENERATED
+        BILLING_DOCUMENT_GENERATED,
+        FORCE_VAT_APPLICATION
     }
 
     private final String reservationId;
