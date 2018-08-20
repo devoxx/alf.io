@@ -214,6 +214,10 @@
                 }
             }
         }
+
+        ctrl.displayInvoiceReceiptButtons = function() {
+            return ctrl.reservation.status !== 'PENDING' && ctrl.reservation.status !== 'CANCELLED';
+        }
     }
 
 })();
