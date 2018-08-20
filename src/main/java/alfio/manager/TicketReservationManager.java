@@ -79,8 +79,7 @@ import static alfio.model.Audit.EntityType.RESERVATION;
 import static alfio.model.BillingDocument.Type.INVOICE;
 import static alfio.model.BillingDocument.Type.RECEIPT;
 import static alfio.model.PromoCodeDiscount.categoriesOrNull;
-import static alfio.model.TicketReservation.TicketReservationStatus.IN_PAYMENT;
-import static alfio.model.TicketReservation.TicketReservationStatus.OFFLINE_PAYMENT;
+import static alfio.model.TicketReservation.TicketReservationStatus.*;
 import static alfio.model.system.Configuration.getSystemConfiguration;
 import static alfio.model.system.ConfigurationKeys.*;
 import static alfio.model.transaction.PaymentProxy.OFFLINE;
@@ -582,6 +581,9 @@ public class TicketReservationManager {
      */
     @Transactional
     void ensureBillingDocumentIsPresent(Event event, TicketReservation reservation, String username) {
+        if(reservation.getStatus() == PENDING || reservation.getStatus() == CANCELLED) {
+            return;
+        }
         OrderSummary summary = orderSummaryForReservationId(reservation.getId(), event, Locale.forLanguageTag(reservation.getUserLanguage()));
         if(TicketReservationManager.mustGenerateBillingDocument(summary, reservation)) {
             getOrCreateBillingDocumentModel(event, reservation, username);
