@@ -585,7 +585,8 @@ public class AdminReservationManager {
     @Transactional
     public Result<Boolean> regenerateBillingDocument(String eventName, String reservationId, String username) {
         return loadReservation(eventName, reservationId, username).map(res -> {
-            ticketReservationManager.createBillingDocumentModel(res.getRight(), res.getLeft(), username);
+            ticketReservationRepository.addReservationInvoiceOrReceiptModel(reservationId, null);
+            ticketReservationManager.createBillingDocumentModel(res.getRight(), ticketReservationRepository.findReservationById(reservationId), username);
             return true;
         });
     }
@@ -624,7 +625,8 @@ public class AdminReservationManager {
             if(UPDATE_INVOICE_STATUSES.contains(reservation.getStatus()) || forceInvoiceReceiptUpdate) {
                 Audit.EventType eventType = forceInvoiceReceiptUpdate ? FORCED_UPDATE_INVOICE : UPDATE_INVOICE;
                 auditingRepository.insert(reservationId, userId, event.getId(), eventType, date, RESERVATION, reservationId);
-                ticketReservationManager.createBillingDocumentModel(event, reservation, username);
+                ticketReservationRepository.addReservationInvoiceOrReceiptModel(reservationId, null);
+                ticketReservationManager.createBillingDocumentModel(event, ticketReservationRepository.findReservationById(reservationId), username);
             }
             extensionManager.handleTicketCancelledForEvent(event, ticketUUIDs);
         } else {
