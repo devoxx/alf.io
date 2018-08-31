@@ -64,7 +64,8 @@ import java.util.stream.Stream;
 
 import static alfio.model.Audit.EntityType.RESERVATION;
 import static alfio.model.Audit.EntityType.TICKET;
-import static alfio.model.Audit.EventType.*;
+import static alfio.model.Audit.EventType.CANCEL_TICKET;
+import static alfio.model.Audit.EventType.FORCED_UPDATE_INVOICE;
 import static alfio.model.modification.DateTimeModification.fromZonedDateTime;
 import static alfio.util.EventUtil.generateEmptyTickets;
 import static alfio.util.OptionalWrapper.optionally;
@@ -78,7 +79,6 @@ import static org.apache.commons.lang3.StringUtils.trimToNull;
 @RequiredArgsConstructor
 public class AdminReservationManager {
 
-    private static final EnumSet<TicketReservationStatus> UPDATE_INVOICE_STATUSES = EnumSet.of(TicketReservationStatus.PENDING);
     private final EventManager eventManager;
     private final TicketReservationManager ticketReservationManager;
     private final TicketCategoryRepository ticketCategoryRepository;
@@ -585,10 +585,14 @@ public class AdminReservationManager {
     @Transactional
     public Result<Boolean> regenerateBillingDocument(String eventName, String reservationId, String username) {
         return loadReservation(eventName, reservationId, username).map(res -> {
-            ticketReservationRepository.addReservationInvoiceOrReceiptModel(reservationId, null);
-            ticketReservationManager.createBillingDocumentModel(res.getRight(), ticketReservationRepository.findReservationById(reservationId), username);
+            internalRegenerateBillingDocument(res.getRight(), reservationId, username);
             return true;
         });
+    }
+
+    private void internalRegenerateBillingDocument(Event event, String reservationId, String username) {
+        ticketReservationRepository.addReservationInvoiceOrReceiptModel(reservationId, null);
+        ticketReservationManager.createBillingDocumentModel(event, ticketReservationRepository.findReservationById(reservationId), username);
     }
 
     private void removeTicketsFromReservation(TicketReservation reservation, Event event, List<Integer> ticketIds, boolean notify, String username, boolean removeReservation, boolean forceInvoiceReceiptUpdate) {
@@ -621,12 +625,9 @@ public class AdminReservationManager {
         int[] results = jdbc.batchUpdate(ticketRepository.batchReleaseTickets(), args);
         Validate.isTrue(Arrays.stream(results).sum() == args.length, "Failed to update tickets");
         if(!removeReservation) {
-            //#407 update invoice/receipt model only if the reservation is still "PENDING", otherwise we could lead to accountancy problems
-            if(UPDATE_INVOICE_STATUSES.contains(reservation.getStatus()) || forceInvoiceReceiptUpdate) {
-                Audit.EventType eventType = forceInvoiceReceiptUpdate ? FORCED_UPDATE_INVOICE : UPDATE_INVOICE;
-                auditingRepository.insert(reservationId, userId, event.getId(), eventType, date, RESERVATION, reservationId);
-                ticketReservationRepository.addReservationInvoiceOrReceiptModel(reservationId, null);
-                ticketReservationManager.createBillingDocumentModel(event, ticketReservationRepository.findReservationById(reservationId), username);
+            if(forceInvoiceReceiptUpdate) {
+                auditingRepository.insert(reservationId, userId, event.getId(), FORCED_UPDATE_INVOICE, date, RESERVATION, reservationId);
+                internalRegenerateBillingDocument(event, reservationId, username);
             }
             extensionManager.handleTicketCancelledForEvent(event, ticketUUIDs);
         } else {

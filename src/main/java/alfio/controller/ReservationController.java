@@ -746,7 +746,13 @@ public class ReservationController {
         Locale locale = RequestContextUtils.getLocale(request);
         Map<String, Object> model = ticketReservationManager.prepareModelForReservationEmail(event, reservation);
         OrderSummary summary = ticketReservationManager.orderSummaryForReservationId(reservation.getId(), event, Locale.forLanguageTag(reservation.getUserLanguage()));
-        List<Mailer.Attachment> attachments = TicketReservationManager.mustGenerateBillingDocument(summary, reservation) ? TicketReservationManager.generateReceiptOrInvoice(event, reservation, locale, reservation.getId(), model) : Collections.emptyList();
+
+        final List<Mailer.Attachment> attachments;
+        if(TicketReservationManager.mustGenerateBillingDocument(summary, reservation)) {
+            attachments = TicketReservationManager.generateReceiptOrInvoice(event, reservation, locale, reservation.getId(), ticketReservationManager.getOrCreateBillingDocumentModel(event, reservation, null));
+        } else {
+            attachments = Collections.emptyList();
+        }
         notificationManager.sendSimpleEmail(event, organization.getEmail(), cc, "Reservation complete " + StringUtils.defaultString(reservation.getInvoiceNumber()), () ->
             templateManager.renderTemplate(event, TemplateResource.CONFIRMATION_EMAIL_FOR_ORGANIZER, model,
                 locale), attachments
