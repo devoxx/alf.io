@@ -89,6 +89,7 @@ public class TicketReservation {
                              @Column("used_vat_percent") BigDecimal usedVatPercent,
                              @Column("vat_included") Boolean vatIncluded,
                              @Column("creation_ts") ZonedDateTime creationTimestamp,
+                             @Column("registration_ts") ZonedDateTime registrationTimestamp,
                              @Column("customer_reference") String customerReference) {
         this.id = id;
         this.validity = validity;
@@ -115,7 +116,7 @@ public class TicketReservation {
         this.usedVatPercent = usedVatPercent;
         this.vatIncluded = vatIncluded;
         this.creationTimestamp = creationTimestamp;
-        this.registrationTimestamp = creationTimestamp; //temporary
+        this.registrationTimestamp = registrationTimestamp;
         this.customerReference = customerReference;
     }
 

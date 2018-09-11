@@ -21,8 +21,10 @@ import alfio.model.*;
 import alfio.model.system.ConfigurationKeys;
 import alfio.model.system.EventMigration;
 import alfio.model.transaction.PaymentProxy;
+import alfio.repository.BillingDocumentRepository;
 import alfio.repository.EventRepository;
 import alfio.repository.TicketCategoryRepository;
+import alfio.repository.TicketReservationRepository;
 import alfio.repository.system.ConfigurationRepository;
 import alfio.repository.system.EventMigrationRepository;
 import alfio.util.MonetaryUtil;
@@ -69,6 +71,8 @@ public class DataMigrator {
     private final ConfigurationRepository configurationRepository;
     private final NamedParameterJdbcTemplate jdbc;
     private final TicketReservationManager ticketReservationManager;
+    private final BillingDocumentRepository billingDocumentRepository;
+    private final TicketReservationRepository ticketReservationRepository;
 
     static {
         PRICE_UPDATE_BY_KEY.put("event", "update event set src_price_cts = :srcPriceCts, vat_status = :vatStatus where id = :eventId");
@@ -87,7 +91,9 @@ public class DataMigrator {
                         PlatformTransactionManager transactionManager,
                         ConfigurationRepository configurationRepository,
                         NamedParameterJdbcTemplate jdbc,
-                        TicketReservationManager ticketReservationManager) {
+                        TicketReservationManager ticketReservationManager,
+                        BillingDocumentRepository billingDocumentRepository,
+                        TicketReservationRepository ticketReservationRepository) {
         this.eventMigrationRepository = eventMigrationRepository;
         this.eventRepository = eventRepository;
         this.ticketCategoryRepository = ticketCategoryRepository;
@@ -98,6 +104,8 @@ public class DataMigrator {
         this.buildTimestamp = ZonedDateTime.parse(buildTimestamp);
         this.transactionTemplate = new TransactionTemplate(transactionManager, new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         this.ticketReservationManager = ticketReservationManager;
+        this.billingDocumentRepository = billingDocumentRepository;
+        this.ticketReservationRepository = ticketReservationRepository;
     }
 
     public void migrateEventsToCurrentVersion() {
@@ -132,6 +140,7 @@ public class DataMigrator {
                 migratePrices(event.getId());
                 fixStuckTickets(event.getId());
                 createBillingDocuments(event);
+                regenerateWrongBillingDocuments(event);
 
                 if(alreadyDefined) {
                     EventMigration eventMigration = optional.get();
@@ -143,6 +152,28 @@ public class DataMigrator {
 
                 return null;
             });
+        }
+    }
+
+    private void regenerateWrongBillingDocuments(Event event) {
+        EnumSet<TicketReservation.TicketReservationStatus> statuses = EnumSet.of(TicketReservation.TicketReservationStatus.COMPLETE, TicketReservation.TicketReservationStatus.OFFLINE_PAYMENT);
+
+        List<String> results = jdbc.queryForList("select id from tickets_reservation where fix_billing_document = true", Collections.emptyMap())
+            .stream()
+            .map(map -> (String) map.get("id"))
+            .collect(toList());
+
+        results.forEach(reservationId -> {
+                TicketReservation reservation = ticketReservationRepository.findReservationById(reservationId);
+                if(statuses.contains(reservation.getStatus())) {
+                    billingDocumentRepository.deleteForReservation(reservationId, event.getId());
+                    ticketReservationManager.getOrCreateBillingDocumentModel(event, reservation, null);
+                    log.warn("****** Regenerated Billing document for invoice id {}, reservation id {} ", reservation.getInvoiceNumber(), reservation.getId());
+                }
+            });
+
+        if(!results.isEmpty()) {
+            jdbc.update("update tickets_reservation set fix_billing_document = false where id in(:ids)", Collections.singletonMap("ids", results));
         }
     }
 

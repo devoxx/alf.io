@@ -753,6 +753,7 @@ public class TicketReservationManager {
 
         Date timestamp = new Date();
         auditingRepository.insert(reservationId, null, eventId, Audit.EventType.RESERVATION_COMPLETE, timestamp, Audit.EntityType.RESERVATION, reservationId);
+        ticketReservationRepository.updateRegistrationTimestamp(reservationId, ZonedDateTime.now(event.getZoneId()));
 
         if(tcAccepted) {
             auditingRepository.insert(reservationId, null, eventId, Audit.EventType.TERMS_CONDITION_ACCEPTED, timestamp, Audit.EntityType.RESERVATION, reservationId, singletonList(singletonMap("termsAndConditionsUrl", event.getTermsAndConditionsUrl())));

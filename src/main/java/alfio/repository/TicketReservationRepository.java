@@ -99,8 +99,12 @@ public interface TicketReservationRepository {
     @Query("update tickets_reservation set status = :status where id = :reservationId")
     int updateReservationStatus(@Bind("reservationId") String reservationId, @Bind("status") String status);
 
+    @Query("update tickets_reservation set registration_ts = :registrationTimestamp where id = :reservationId")
+    int updateRegistrationTimestamp(@Bind("reservationId") String id, @Bind("registrationTimestamp") ZonedDateTime registrationTimestamp);
+
     @Query("update tickets_reservation set status = :status where id in (:reservationIds)")
     int updateReservationsStatus(@Bind("reservationIds") Collection<String> ids, @Bind("status") String status);
+
 
     @Query("select * from tickets_reservation where id = :id")
     TicketReservation findReservationById(@Bind("id") String id);

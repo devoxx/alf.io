@@ -79,6 +79,7 @@ public class TicketWithReservationAndTransaction {
                                                @Column("tr_used_vat_percent") BigDecimal usedVadPercent,
                                                @Column("tr_vat_included") Boolean vatIncluded,
                                                @Column("tr_creation_ts") ZonedDateTime reservationCreationTimestamp,
+                                               @Column("tr_registration_ts") ZonedDateTime reservationRegistrationTimestamp,
                                                @Column("tr_customer_reference") String customerReference,
                                                //
                                                @Column("bt_id") Integer btId,
@@ -104,7 +105,7 @@ public class TicketWithReservationAndTransaction {
             billingAddress, confirmationTimestamp, latestReminder, paymentMethod,
             reminderSent, promoCodeDiscountId, automatic, trUserLanguage,
             directAssignmentRequested, invoiceNumber, invoiceModel, vatStatus, vatNr, vatCountryCode, invoiceRequested,
-            usedVadPercent, vatIncluded, reservationCreationTimestamp, customerReference);
+            usedVadPercent, vatIncluded, reservationCreationTimestamp, reservationRegistrationTimestamp, customerReference);
 
         if(btId != null) {
             this.transaction = Optional.of(new Transaction(btId, transactionId, paymentId, reservationId,
