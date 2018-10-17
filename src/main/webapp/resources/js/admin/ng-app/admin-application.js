@@ -1170,7 +1170,7 @@
 
         $scope.selection = {};
         $scope.checkedInSelection = {};
-        $scope.itemsPerPage = 3;
+        $scope.itemsPerPage = 10;
         $scope.currentPage = 1;
         $scope.currentPageCheckedIn = 1;
         $scope.advancedSearch = {};
