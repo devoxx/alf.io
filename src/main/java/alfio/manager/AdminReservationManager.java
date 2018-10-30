@@ -31,6 +31,7 @@ import alfio.model.result.Result;
 import alfio.model.result.Result.ResultStatus;
 import alfio.model.transaction.PaymentProxy;
 import alfio.model.user.Organization;
+import alfio.model.user.User;
 import alfio.repository.*;
 import alfio.repository.user.UserRepository;
 import alfio.util.MonetaryUtil;
@@ -235,12 +236,23 @@ public class AdminReservationManager {
                 ticketReservationRepository.resetVat(reservationId, newVatStatus);
             }
         }
-
+        Date d = new Date();
         arm.getTicketsInfo().stream()
             .filter(TicketsInfo::isUpdateAttendees)
             .flatMap(ti -> ti.getAttendees().stream())
-            .forEach(a -> ticketRepository.updateTicketOwnerById(a.getTicketId(), trimToNull(a.getEmailAddress()),
-                trimToNull(a.getFullName()), trimToNull(a.getFirstName()), trimToNull(a.getLastName())));
+            .forEach(a -> {
+                String email = trimToNull(a.getEmailAddress());
+                String firstName = trimToNull(a.getFirstName());
+                String lastName = trimToNull(a.getLastName());
+                String fullName = trimToNull(a.getFullName());
+                ticketRepository.updateTicketOwnerById(a.getTicketId(), email, fullName, firstName, lastName);
+                Integer userId = userRepository.findByUsername(username).map(User::getId).orElse(null);
+                Map<String, Object> modifications = new HashMap<>();
+                modifications.put("firstName", firstName);
+                modifications.put("lastName", lastName);
+                modifications.put("fullName", fullName);
+                auditingRepository.insert(reservationId, userId, event.getId(), UPDATE_TICKET, d, TICKET, Integer.toString(a.getTicketId()), singletonList(modifications));
+            });
         return Result.success(true);
     }
 
@@ -277,7 +289,6 @@ public class AdminReservationManager {
         Set<String> keys = input.getTicketsInfo().stream().flatMap(ti -> ti.getAttendees().stream())
             .flatMap(a -> a.getAdditionalInfo().keySet().stream())
             .map(String::toLowerCase)
-            .distinct()
             .collect(toSet());
 
         if(keys.size() == 0) {
