@@ -57,6 +57,7 @@ import java.util.stream.Collectors;
 
 import static alfio.manager.support.CheckInStatus.*;
 import static alfio.model.system.ConfigurationKeys.*;
+import static org.apache.commons.lang3.StringUtils.trimToEmpty;
 
 @Component
 @Transactional
@@ -110,11 +111,22 @@ public class CheckInManager {
         return uuid;
     }
 
-    public TicketAndCheckInResult checkIn(String shortName, String ticketIdentifier, Optional<String> ticketCode, String username, String auditUser) {
-        return eventRepository.findOptionalByShortName(shortName)
+    public TicketAndCheckInResult checkIn(String eventShortName, String ticketIdentifier, Optional<String> ticketCode, String username, String auditUser,
+                                          boolean automaticallyConfirmOnSitePayment) {
+        return eventRepository.findOptionalByShortName(eventShortName)
             .filter(EventManager.checkOwnership(username, organizationRepository))
-            .map(e -> checkIn(e.getId(), ticketIdentifier, ticketCode, auditUser))
+            .map(e -> {
+                if (automaticallyConfirmOnSitePayment && CheckInStatus.MUST_PAY == evaluateTicketStatus(eventShortName, ticketIdentifier, ticketCode).getResult().getStatus()) {
+                    log.info("in event {} automaticallyConfirmOnSitePayment for {}", eventShortName, ticketIdentifier);
+                    confirmOnSitePayment(eventShortName, ticketIdentifier, ticketCode, username, auditUser);
+                }
+                return checkIn(e.getId(), ticketIdentifier, ticketCode, auditUser);
+            })
             .orElseGet(() -> new TicketAndCheckInResult(null, new DefaultCheckInResult(CheckInStatus.EVENT_NOT_FOUND, "event not found")));
+    }
+
+    public TicketAndCheckInResult checkIn(String shortName, String ticketIdentifier, Optional<String> ticketCode, String username, String auditUser) {
+        return checkIn(shortName, ticketIdentifier, ticketCode, username, auditUser, false);
     }
 
     public TicketAndCheckInResult checkIn(int eventId, String ticketIdentifier, Optional<String> ticketCode, String user) {
@@ -325,8 +337,10 @@ public class CheckInManager {
                 info.put("uuid", ticket.getUuid());
                 info.put("category", ticket.getTicketCategory().getName());
                 if (!additionalFields.isEmpty()) {
-                    Map<String, String> map = ticketFieldRepository.findValueForTicketId(ticket.getId(), additionalFields).stream().collect(Collectors.toMap(TicketFieldValue::getName, TicketFieldValue::getValue));
-                    info.put("additionalInfoJson", Json.toJson(map));
+                    Map<String, String> fields = new HashMap<>();
+                    fields.put("company", trimToEmpty(ticket.getTicketReservation().getBillingAddressCompany()));
+                    fields.putAll(ticketFieldRepository.findValueForTicketId(ticket.getId(), additionalFields).stream().collect(Collectors.toMap(TicketFieldValue::getName, TicketFieldValue::getValue)));
+                    info.put("additionalInfoJson", Json.toJson(fields));
                 }
 
                 //
