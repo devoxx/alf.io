@@ -65,8 +65,7 @@ import java.util.stream.Stream;
 
 import static alfio.model.Audit.EntityType.RESERVATION;
 import static alfio.model.Audit.EntityType.TICKET;
-import static alfio.model.Audit.EventType.CANCEL_TICKET;
-import static alfio.model.Audit.EventType.FORCED_UPDATE_INVOICE;
+import static alfio.model.Audit.EventType.*;
 import static alfio.model.modification.DateTimeModification.fromZonedDateTime;
 import static alfio.util.EventUtil.generateEmptyTickets;
 import static alfio.util.OptionalWrapper.optionally;
