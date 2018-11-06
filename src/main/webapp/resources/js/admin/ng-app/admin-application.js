@@ -1170,7 +1170,7 @@
 
         $scope.selection = {};
         $scope.checkedInSelection = {};
-        $scope.itemsPerPage = 20;
+        $scope.itemsPerPage = 10;
         $scope.currentPage = 1;
         $scope.currentPageCheckedIn = 1;
         $scope.advancedSearch = {};
@@ -1372,10 +1372,10 @@
             var eventId = $scope.event.id;
             var query = $scope.selection.freeText;
             var pageNotCheckedIn = $scope.currentPage;
-            var offsetNotCheckedIn = query ? 0 : $scope.itemsPerPage * (pageNotCheckedIn - 1);
+            var offsetNotCheckedIn = $scope.itemsPerPage * (pageNotCheckedIn - 1);
 
             var pageCheckedIn = $scope.currentPageCheckedIn;
-            var offsetCheckedIn = query ? 0 : $scope.itemsPerPage * (pageCheckedIn - 1);
+            var offsetCheckedIn = $scope.itemsPerPage * (pageCheckedIn - 1);
 
             var filter = function(ticket) {
                 return ticket.eventId === eventId && (!query || query === '' ||
